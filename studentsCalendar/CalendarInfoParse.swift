@@ -22,6 +22,55 @@ import UIKit
 //    }
 //}
 
+func saveEventsToUserDefaults(events: [Event]) {
+    let encoder = JSONEncoder()
+    if let encoded = try? encoder.encode(events) {
+        UserDefaults.standard.set(encoded, forKey: "savedEvents")
+    }
+}
+
+func loadEventsFromUserDefaults() -> [Event] {
+    if let savedData = UserDefaults.standard.data(forKey: "savedEvents"),
+       let decodedEvents = try? JSONDecoder().decode([Event].self, from: savedData) {
+        return decodedEvents
+    }
+    return []
+}
+
+func uploadAndParseEvents() {
+    let urlString = "https://apps.usos.agh.edu.pl/services/tt/upcoming_ical?lang=en&user_id=138230&key=SjJz4MZnfTsGCjUPjxye"
+
+    guard let url = URL(string: urlString) else {
+        print("Invalid URL")
+        return
+    }
+
+    let task = URLSession.shared.dataTask(with: url) { data, response, error in
+        if let error = error {
+            print("Error fetching calendar: \(error.localizedDescription)")
+            return
+        }
+
+        guard let httpResponse = response as? HTTPURLResponse, (200...299).contains(httpResponse.statusCode) else {
+            print("Server error: Invalid response")
+            return
+        }
+
+        guard let data = data, let icsString = String(data: data, encoding: .utf8) else {
+            print("Error decoding ICS data")
+            return
+        }
+
+        let events = parseICSEvents(icsData: icsString)
+
+        DispatchQueue.main.async {
+            eventsList = events  // Update global/local events list
+            saveEventsToUserDefaults(events: events) // Store in UserDefaults
+        }
+    }
+    task.resume()
+}
+
 func parseICSEvents(icsData: String) -> [UniEvent] {
     let lines = icsData.components(separatedBy: CharacterSet.newlines)
     var events: [UniEvent] = []
@@ -70,7 +119,23 @@ func parseICSEvents(icsData: String) -> [UniEvent] {
                 }
             }
         } else if trimmed == "END:VEVENT" {
-            let event = UniEvent(summary: summary, start: start, end: end, roomNumber: roomNumber, building: buildingName, location: location, isEventOblig: isEventOblig)
+            // Convert start string to Date
+            let dateFormatter = DateFormatter()
+            dateFormatter.dateFormat = "yyyy-MM-dd HH:mm"
+            dateFormatter.timeZone = TimeZone.current
+            var eventDate = dateFormatter.date(from: start)// Default to current date if parsing fails
+            
+            let event = UniEvent(id: events.count + 1, // Unique ID
+                                 name: summary,
+                                 date: eventDate!,
+                                 summary: summary,
+                                 start: start,
+                                 end: end,
+                                 roomNumber: roomNumber,
+                                 building: buildingName,
+                                 location: location,
+                                 isEventOblig: isEventOblig)
+            
             events.append(event)
 
             // Reset variables
@@ -88,39 +153,47 @@ func parseICSEvents(icsData: String) -> [UniEvent] {
     return events
 }
 
-func uploadAndParseEvents() {
-    let urlString = "https://apps.usos.agh.edu.pl/services/tt/upcoming_ical?lang=en&user_id=138230&key=SjJz4MZnfTsGCjUPjxye"
-        //https://apps.usos.agh.edu.pl/services/tt/upcoming_ical?lang=en&user_id=138230&key=SjJz4MZnfTsGCjUPjxye
-
-    guard let url = URL(string: urlString) else {
-        print("Invalid URL")
-        return
-    }
-
-    let task = URLSession.shared.dataTask(with: url) { data, response, error in
-        if let error = error {
-            print("Error fetching calendar: \(error.localizedDescription)")
-            return
-        }
-
-        guard let httpResponse = response as? HTTPURLResponse, (200...299).contains(httpResponse.statusCode) else {
-            print("Server error: Invalid response")
-            return
-        }
-
-        guard let data = data, let icsString = String(data: data, encoding: .utf8) else {
-            print("Error decoding ICS data")
-            return
-        }
-
-        let events = parseICSEvents(icsData: icsString)
-
-        DispatchQueue.main.async {
-            handleParsedEvents(events)
-        }
-    }
-    task.resume()
+// Helper function to convert String to Date
+func parseDate(from dateString: String) -> Date? {
+    let formatter = DateFormatter()
+    formatter.dateFormat = "yyyyMMdd'T'HHmmss'Z'" // Adjust format to match ICS date format
+    formatter.timeZone = TimeZone(abbreviation: "UTC")
+    return formatter.date(from: dateString)
 }
+
+//func uploadAndParseEvents() {
+//    let urlString = "https://apps.usos.agh.edu.pl/services/tt/upcoming_ical?lang=en&user_id=138230&key=SjJz4MZnfTsGCjUPjxye"
+//        //https://apps.usos.agh.edu.pl/services/tt/upcoming_ical?lang=en&user_id=138230&key=SjJz4MZnfTsGCjUPjxye
+//
+//    guard let url = URL(string: urlString) else {
+//        print("Invalid URL")
+//        return
+//    }
+//
+//    let task = URLSession.shared.dataTask(with: url) { data, response, error in
+//        if let error = error {
+//            print("Error fetching calendar: \(error.localizedDescription)")
+//            return
+//        }
+//
+//        guard let httpResponse = response as? HTTPURLResponse, (200...299).contains(httpResponse.statusCode) else {
+//            print("Server error: Invalid response")
+//            return
+//        }
+//
+//        guard let data = data, let icsString = String(data: data, encoding: .utf8) else {
+//            print("Error decoding ICS data")
+//            return
+//        }
+//
+//        let events = parseICSEvents(icsData: icsString)
+//
+//        DispatchQueue.main.async {
+//            handleParsedEvents(events)
+//        }
+//    }
+//    task.resume()
+//}
 
 //func handleParsedEvents(_ events: [UniEvent]) {
 //    for event in events {

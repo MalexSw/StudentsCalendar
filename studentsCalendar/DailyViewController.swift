@@ -18,26 +18,43 @@ class DailyViewController: UIViewController, UITableViewDelegate, UITableViewDat
         super.viewDidLoad()
         
         NotificationCenter.default.addObserver(self, selector: #selector(updateEvents), name: NSNotification.Name("EventsUpdated"), object: nil)
-        
         Task {
             await updateEventsList()
+            updateEvents()
+        }
+    }
+    
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        Task {
+            await MainActor.run {
+                updateEvents()
+            }
         }
     }
     
     func updateEventsList() async {
         guard let date = selectedDate else { return }
-        DispatchQueue.main.async {
+        DispatchQueue.main.async { [self] in
             let day = CalendarHelper().dayOfMonth(date: date)
             let month = CalendarHelper().monthString(date: date)
             let year = CalendarHelper().yearString(date: date)
             
             self.monthLabel.text = month
+            self.totalEventsLabel.text = "Total events for today: \(Event().eventsForDate(date: selectedDate!).count)"
+            self.dayLabel.text = "\(dayOfWeek(from: date)), \(day)"
             print("Selected Date: \(day) \(month) \(year)")
 
-            self.tableView.reloadData()
+            updateEvents()
         }
     }
 
+    func dayOfWeek(from date: Date) -> String {
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "EEEE" // Full weekday name (e.g., Monday)
+        dateFormatter.locale = Locale.current // Ensures localization if needed
+        return dateFormatter.string(from: date)
+    }
     
     @objc func updateEvents() {
         tableView.reloadData()
@@ -58,11 +75,6 @@ class DailyViewController: UIViewController, UITableViewDelegate, UITableViewDat
     }
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        if Event().eventsForDate(date: selectedDate!).count != 0 {
-            totalEventsLabel.text = "Total events for today: \(Event().eventsForDate(date: selectedDate!).count)"
-        } else {
-            totalEventsLabel.text = "Waiting......"
-        }
         return Event().eventsForDate(date: selectedDate!).count
     }
     

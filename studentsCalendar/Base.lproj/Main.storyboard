@@ -306,7 +306,7 @@
                     <navigationItem key="navigationItem" title="Daily Calendar" id="4Ak-CZ-Oqv">
                         <barButtonItem key="rightBarButtonItem" style="plain" systemItem="add" id="j5Q-0Q-mx7">
                             <connections>
-                                <segue destination="qzK-CS-k4x" kind="show" id="7pn-el-8zJ"/>
+                                <segue destination="qzK-CS-k4x" kind="show" identifier="dayController" id="7pn-el-8zJ"/>
                             </connections>
                         </barButtonItem>
                     </navigationItem>
@@ -511,7 +511,7 @@
                     <navigationItem key="navigationItem" title="Weekly Calendar" id="m29-HH-koQ">
                         <barButtonItem key="rightBarButtonItem" style="plain" systemItem="add" id="BnL-Sl-oj5">
                             <connections>
-                                <segue destination="qzK-CS-k4x" kind="show" id="pXJ-Dm-Ure"/>
+                                <segue destination="qzK-CS-k4x" kind="show" identifier="weekController" id="pXJ-Dm-Ure"/>
                             </connections>
                         </barButtonItem>
                     </navigationItem>
@@ -529,7 +529,7 @@
         <scene sceneID="BgE-25-w2q">
             <objects>
                 <viewController id="qzK-CS-k4x" customClass="EventEditViewController" customModule="studentsCalendar" customModuleProvider="target" sceneMemberID="viewController">
-                    <view key="view" contentMode="scaleToFill" ambiguous="YES" id="DKP-eH-CRw">
+                    <view key="view" contentMode="scaleToFill" id="DKP-eH-CRw">
                         <rect key="frame" x="0.0" y="0.0" width="393" height="852"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
@@ -557,7 +557,6 @@
                             <constraint firstItem="gvs-go-hEh" firstAttribute="top" secondItem="hNF-7L-jzC" secondAttribute="top" constant="64" id="jIN-qq-tUG"/>
                             <constraint firstItem="ECn-xo-oih" firstAttribute="top" secondItem="gvs-go-hEh" secondAttribute="bottom" constant="16" id="rB2-wl-PbR"/>
                             <constraint firstItem="ECn-xo-oih" firstAttribute="trailing" secondItem="hNF-7L-jzC" secondAttribute="trailing" id="yeL-Vq-56g"/>
-                            <constraint firstItem="ECn-xo-oih" firstAttribute="centerY" secondItem="DKP-eH-CRw" secondAttribute="centerY" id="zMI-jY-WdX"/>
                         </constraints>
                     </view>
                     <navigationItem key="navigationItem" title="Event Edit" id="aqs-Yy-oIs">
@@ -584,11 +583,11 @@
         </scene>
     </scenes>
     <inferredMetricsTieBreakers>
-        <segue reference="7pn-el-8zJ"/>
+        <segue reference="pXJ-Dm-Ure"/>
     </inferredMetricsTieBreakers>
     <resources>
         <image name="arrowshape.backward.circle.fill" catalog="system" width="128" height="123"/>
-        <image name="arrowshape.right.circle.fill" catalog="system" width="128" height="123"/>
+        <image name="arrowshape.right.circle.fill" catalog="system" width="32" height="32"/>
         <systemColor name="systemBackgroundColor">
             <color white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
         </systemColor>

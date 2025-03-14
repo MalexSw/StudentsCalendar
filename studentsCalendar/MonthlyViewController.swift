@@ -16,6 +16,7 @@ class MonthlyViewController: UIViewController, UICollectionViewDelegate, UIColle
     override func viewDidLoad() {
         super.viewDidLoad()
         uploadAndParseEvents()
+        eventsList = loadEventsFromUserDefaults()
 //        Task {
 //            await DataStorage.shared.fetchEventsIfNeeded(fetchFunction: uploadAndParseEvents)
 //        }
@@ -38,6 +39,7 @@ class MonthlyViewController: UIViewController, UICollectionViewDelegate, UIColle
             await setMonthView()
         }
     }
+    
     
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         let selectedDayString = totalSquares[indexPath.item]

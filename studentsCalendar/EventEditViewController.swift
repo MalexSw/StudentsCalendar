@@ -16,7 +16,6 @@ class EventEditViewController: UIViewController
     override func viewDidLoad()
     {
         super.viewDidLoad()
-        
         datePicker.date = selectedDate
     }
     
@@ -26,7 +25,8 @@ class EventEditViewController: UIViewController
         newEvent.id = eventsList.count
         newEvent.name = nameTF.text
         newEvent.date = datePicker.date
-        eventsList.append(newEvent as! UniEvent)
+        eventsList.append(newEvent)
+        eventsList = eventsList.sorted { $0.date < $1.date }
         navigationController?.popViewController(animated: true)
     }
 }
