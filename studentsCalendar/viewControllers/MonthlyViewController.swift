@@ -12,25 +12,19 @@ class MonthlyViewController: UIViewController, UICollectionViewDelegate, UIColle
     var selectedDate = Date()
     var totalSquares = [String]()
     let showConcreteDay = "showConcreteDay"
+    let scheduleURLKey = "scheduleURL"
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        collectionView.register(MonthlyCollectionViewCell.nib(), forCellWithReuseIdentifier: "MonthlyCollectionViewCell")
+        checkAndRequestScheduleURL()
         uploadAndParseEvents()
         eventsList = loadEventsFromUserDefaults()
-//        Task {
-//            await DataStorage.shared.fetchEventsIfNeeded(fetchFunction: uploadAndParseEvents)
-//        }
+//        UserDefaults.standard.removeObject(forKey: "savedEvents")
+//        UserDefaults.standard.synchronize()
+//        UserDefaults.standard.removeObject(forKey: "scheduleURL")
+//        UserDefaults.standard.synchronize()
         
-        //            Task {
-        //                eventsList = await fetchAndParseEvents() // Fetch the list of events
-        //            }
-        //
-        //            if let cachedData = DataStorage.shared.storedData {
-        //                print("Cached Data: \(cachedData.exchangeRate), Last Update: \(cachedData.lastUpdate)")
-        //            } else {
-        //                print("No cached data found")
-        //            }
-        //        }
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -38,6 +32,36 @@ class MonthlyViewController: UIViewController, UICollectionViewDelegate, UIColle
         Task {
             await setMonthView()
         }
+    }
+    
+    func checkAndRequestScheduleURL() {
+        if UserDefaults.standard.string(forKey: scheduleURLKey) == nil {
+            promptForScheduleURL()
+        }
+    }
+
+    func promptForScheduleURL() {
+        let alert = UIAlertController(title: "Enter Schedule URL", message: "Please enter the URL for the schedule.", preferredStyle: .alert)
+        
+        alert.addTextField { textField in
+            textField.placeholder = "https://example.com/schedule"
+            textField.keyboardType = .URL
+        }
+        
+        let saveAction = UIAlertAction(title: "Save", style: .default) { _ in
+            if let urlText = alert.textFields?.first?.text, !urlText.isEmpty {
+                UserDefaults.standard.set(urlText, forKey: self.scheduleURLKey)
+            } else {
+                self.promptForScheduleURL() // Re-prompt if input is empty
+            }
+        }
+        
+        alert.addAction(saveAction)
+        present(alert, animated: true)
+    }
+
+    func getScheduleURL() -> String? {
+        return UserDefaults.standard.string(forKey: scheduleURLKey)
     }
     
     
@@ -101,7 +125,8 @@ class MonthlyViewController: UIViewController, UICollectionViewDelegate, UIColle
     }
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-        let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "calCell", for: indexPath) as! GlobalCalendarCell
+//        let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "calCell", for: indexPath) as! GlobalCalendarCell
+        let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "MonthlyCollectionViewCell", for: indexPath) as! MonthlyCollectionViewCell
         //cell.dayOfMonth.text = totalSquares[indexPath.item]
         //cell.ifEventPresent = checkIfEventExists(for: totalSquares[indexPath.item])
         checkIfEventExists(for: totalSquares[indexPath.item])
@@ -115,7 +140,7 @@ class MonthlyViewController: UIViewController, UICollectionViewDelegate, UIColle
         let components = Calendar.current.dateComponents([.year, .month], from: selectedDate)
         
         var dateComponents = components
-        dateComponents.day = dayInt + 1
+        dateComponents.day = dayInt
 
         guard let fullDate = Calendar.current.date(from: dateComponents) else { return false }
 
