@@ -7,15 +7,12 @@ class GlobalCalendarCell: UICollectionViewCell {
     private var eventView: UIView!
 
     override func awakeFromNib() {
-        //super.awakeFromNib()
-                eventView = UIView(frame: CGRect(x: self.bounds.width / 2 - 3, y: self.bounds.height - 12, width: 6, height: 6))
+        super.awakeFromNib()
         eventView.backgroundColor = .red
         eventView.layer.cornerRadius = 3  // Make it a small circle
         eventView.isHidden = true  // Start as hidden
         eventView.clipsToBounds = true  // Ensure rounded corners apply properly
-        self.addSubview(eventView)
     }
-
     
     func configure(day: String, hasEvent: Bool) {
         dayOfMonth.text = day
