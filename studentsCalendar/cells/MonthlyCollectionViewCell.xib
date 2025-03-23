@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="23504" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
+    <device id="retina6_12" orientation="portrait" appearance="light"/>
+    <dependencies>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="23506"/>
+        <capability name="Safe area layout guides" minToolsVersion="9.0"/>
+        <capability name="System colors in document resources" minToolsVersion="11.0"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
+    </dependencies>
+    <objects>
+        <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner"/>
+        <placeholder placeholderIdentifier="IBFirstResponder" id="-2" customClass="UIResponder"/>
+        <collectionViewCell opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" reuseIdentifier="MonthlyCollectionViewCell" id="gTV-IL-0wX" customClass="MonthlyCollectionViewCell" customModule="studentsCalendar" customModuleProvider="target">
+            <rect key="frame" x="0.0" y="0.0" width="109" height="65"/>
+            <autoresizingMask key="autoresizingMask"/>
+            <view key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center">
+                <rect key="frame" x="0.0" y="0.0" width="109" height="65"/>
+                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                <subviews>
+                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="3s7-nJ-me6">
+                        <rect key="frame" x="26.666666666666671" y="3.9999999999999982" width="56" height="26.333333333333329"/>
+                        <fontDescription key="fontDescription" type="boldSystem" pointSize="22"/>
+                        <nil key="textColor"/>
+                        <nil key="highlightedColor"/>
+                    </label>
+                    <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="ASR-Bk-rEb">
+                        <rect key="frame" x="51.666666666666664" y="38.333333333333336" width="6" height="6"/>
+                        <color key="backgroundColor" systemColor="systemMintColor"/>
+                        <constraints>
+                            <constraint firstAttribute="width" constant="6" id="C0o-lW-j82"/>
+                            <constraint firstAttribute="height" constant="6" id="ww5-XW-hG3"/>
+                        </constraints>
+                    </view>
+                </subviews>
+            </view>
+            <viewLayoutGuide key="safeArea" id="ZTg-uK-7eu"/>
+            <constraints>
+                <constraint firstItem="3s7-nJ-me6" firstAttribute="centerX" secondItem="gTV-IL-0wX" secondAttribute="centerX" id="KRr-Ri-bTr"/>
+                <constraint firstItem="ASR-Bk-rEb" firstAttribute="top" secondItem="3s7-nJ-me6" secondAttribute="bottom" constant="8" id="Zwp-vZ-1Kg"/>
+                <constraint firstItem="3s7-nJ-me6" firstAttribute="top" secondItem="gTV-IL-0wX" secondAttribute="top" constant="4" id="cYJ-hK-kCb"/>
+                <constraint firstItem="ASR-Bk-rEb" firstAttribute="centerX" secondItem="gTV-IL-0wX" secondAttribute="centerX" id="lVi-2c-fI3"/>
+            </constraints>
+            <size key="customSize" width="109" height="65"/>
+            <connections>
+                <outlet property="dayOfMonth" destination="3s7-nJ-me6" id="AIy-gu-7sa"/>
+                <outlet property="eventView" destination="ASR-Bk-rEb" id="9nh-E3-nI8"/>
+            </connections>
+            <point key="canvasLocation" x="127.48091603053435" y="41.197183098591552"/>
+        </collectionViewCell>
+    </objects>
+    <resources>
+        <systemColor name="systemMintColor">
+            <color red="0.0" green="0.78039215689999997" blue="0.74509803919999995" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+        </systemColor>
+    </resources>
+</document>

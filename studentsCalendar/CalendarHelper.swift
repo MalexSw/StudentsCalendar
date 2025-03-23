@@ -70,7 +70,7 @@ class CalendarHelper
     {
         return calendar.date(byAdding: .day, value: days, to: date)!
     }
-
+    
     func mondayForDate(date: Date) -> Date {
         let calendar = Calendar.current
         let weekday = calendar.component(.weekday, from: date)
@@ -78,6 +78,19 @@ class CalendarHelper
         // Adjust so that Monday (weekday == 2) becomes the first day
         let daysSinceMonday = (weekday - 2 + 7) % 7
         return calendar.date(byAdding: .day, value: -daysSinceMonday, to: date)!
+    }
+    
+    func eventsForDate(eventsList: [Event], date: Date) -> [Event]
+    {
+        var daysEvents = [Event]()
+        for event in eventsList
+        {
+            if(Calendar.current.isDate(event.date, inSameDayAs:date))
+            {
+                daysEvents.append(event)
+            }
+        }
+        return daysEvents
     }
 
     

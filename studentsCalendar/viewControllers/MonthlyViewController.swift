@@ -4,7 +4,7 @@ protocol CalendarInformationParseDelegate: AnyObject {
     func userDidChooseConcreteDay(events: [Event])
 }
 
-class MonthlyViewController: UIViewController, UICollectionViewDelegate, UICollectionViewDataSource {
+class MonthlyViewController: UIViewController, UICollectionViewDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout {
     
     @IBOutlet weak var monthLabel: UILabel!
     @IBOutlet weak var collectionView: UICollectionView!
@@ -14,21 +14,49 @@ class MonthlyViewController: UIViewController, UICollectionViewDelegate, UIColle
     let showConcreteDay = "showConcreteDay"
     let scheduleURLKey = "scheduleURL"
     
+    var cellSize: CGSize {
+        let width = (collectionView.frame.size.width - 2.0) / 7.0
+        let height = (collectionView.frame.size.height - 2.0) / 8.0
+        
+        let itemSize = CGSize(width: width, height: height)
+        let flowLayout = collectionView.collectionViewLayout as! UICollectionViewFlowLayout
+        flowLayout.itemSize = CGSize(width: width, height: height)
+        flowLayout.minimumLineSpacing = 0.0
+        flowLayout.minimumInteritemSpacing = 0.0
+        return itemSize
+    }
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         collectionView.register(MonthlyCollectionViewCell.nib(), forCellWithReuseIdentifier: "MonthlyCollectionViewCell")
         checkAndRequestScheduleURL()
         uploadAndParseEvents()
-        eventsList = loadEventsFromUserDefaults()
-//        UserDefaults.standard.removeObject(forKey: "savedEvents")
+        eventsList = loadTheWholeList()
+//        let longPressGesture = UILongPressGestureRecognizer(target: self, action: #selector(handleLongPress))
+//            collectionView.addGestureRecognizer(longPressGesture)
+        
+//        UserDefaults.standard.removeObject(forKey: "savedLoadedEvents")
+//        UserDefaults.standard.synchronize()
+//        UserDefaults.standard.removeObject(forKey: "savedCustomEvents")
 //        UserDefaults.standard.synchronize()
 //        UserDefaults.standard.removeObject(forKey: "scheduleURL")
 //        UserDefaults.standard.synchronize()
         
+        
     }
+    //TODO: Test addition
+//    @objc func handleLongPress(gesture: UILongPressGestureRecognizer) {
+//        if gesture.state == .began {
+//            let touchPoint = gesture.location(in: collectionView)
+//            if let indexPath = collectionView.indexPathForItem(at: touchPoint) {
+//                print("Long pressed cell at section \(indexPath.section), row \(indexPath.item)")
+//                
+//                // Perform action, e.g., delete or edit
+//            }
+//        }
+//    }
     
     override func viewWillAppear(_ animated: Bool) {
-        setCellsView()
         Task {
             await setMonthView()
         }
@@ -89,14 +117,6 @@ class MonthlyViewController: UIViewController, UICollectionViewDelegate, UIColle
         }
     }
     
-    func setCellsView() {
-        let width = (collectionView.frame.size.width - 2) / 8
-        let height = (collectionView.frame.size.height - 2) / 8
-        
-        let flowLayout = collectionView.collectionViewLayout as! UICollectionViewFlowLayout
-        flowLayout.itemSize = CGSize(width: width, height: height)
-    }
-    
     func setMonthView() async {
         totalSquares.removeAll()
         let daysInMonth = await CalendarHelper().daysInMonth(date: selectedDate)
@@ -125,13 +145,11 @@ class MonthlyViewController: UIViewController, UICollectionViewDelegate, UIColle
     }
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-//        let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "calCell", for: indexPath) as! GlobalCalendarCell
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "MonthlyCollectionViewCell", for: indexPath) as! MonthlyCollectionViewCell
-        //cell.dayOfMonth.text = totalSquares[indexPath.item]
-        //cell.ifEventPresent = checkIfEventExists(for: totalSquares[indexPath.item])
-        checkIfEventExists(for: totalSquares[indexPath.item])
         cell.configure(day: totalSquares[indexPath.item], hasEvent: checkIfEventExists(for: totalSquares[indexPath.item]))
-        
+//        cell.layer.borderColor = UIColor.blue.cgColor
+//        cell.layer.cornerRadius = 8.0
+//        cell.layer.borderWidth = 1.5
         return cell
     }
     
@@ -161,6 +179,10 @@ class MonthlyViewController: UIViewController, UICollectionViewDelegate, UIColle
     
     override open var shouldAutorotate: Bool {
         return false
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
+        return cellSize
     }
 }
 
