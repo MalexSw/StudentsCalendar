@@ -1,7 +1,7 @@
 import UIKit
 
 // Save Downloaded Events
-func saveDownloadedEventsToUserDefaults(events: [Event]) {
+func saveDownloadedEventsToUserDefaults(events: [UniversalEvent]) {
     let encoder = JSONEncoder()
     if let encoded = try? encoder.encode(events) {
         UserDefaults.standard.set(encoded, forKey: "savedLoadedEvents")
@@ -9,7 +9,7 @@ func saveDownloadedEventsToUserDefaults(events: [Event]) {
 }
 
 // Save Custom Events
-func saveCustomEventsToUserDefaults(events: [Event]) {
+func saveCustomEventsToUserDefaults(events: [UniversalEvent]) {
     let encoder = JSONEncoder()
     if let encoded = try? encoder.encode(events) {
         UserDefaults.standard.set(encoded, forKey: "savedCustomEvents")
@@ -25,25 +25,25 @@ func saveCustomEventsToUserDefaults(events: [CustomEvent]) {
  */
 
 // Load Downloaded (Schedule) Events
-func loadScheduleEventsFromUserDefaults() -> [Event] {
+func loadScheduleEventsFromUserDefaults() -> [UniversalEvent] {
     if let savedDownloadedData = UserDefaults.standard.data(forKey: "savedLoadedEvents"),
-       let downloadedEvents = try? JSONDecoder().decode([Event].self, from: savedDownloadedData) {
+       let downloadedEvents = try? JSONDecoder().decode([UniversalEvent].self, from: savedDownloadedData) {
         return downloadedEvents
     }
     return []
 }
 
 // Load Custom Events
-func loadCustomEventsFromUserDefaults() -> [Event] {
+func loadCustomEventsFromUserDefaults() -> [UniversalEvent] {
     if let savedCustomData = UserDefaults.standard.data(forKey: "savedCustomEvents"),
-       let customEvents = try? JSONDecoder().decode([Event].self, from: savedCustomData) {
+       let customEvents = try? JSONDecoder().decode([UniversalEvent].self, from: savedCustomData) {
         return customEvents
     }
     return []
 }
 
 // Load the Whole List (Combined Events)
-func loadTheWholeList() -> [Event] {
+func loadTheWholeList() -> [UniversalEvent] {
     var allEvents = loadScheduleEventsFromUserDefaults() + loadCustomEventsFromUserDefaults()
     allEvents.sort { $0.date < $1.date }
     return allEvents

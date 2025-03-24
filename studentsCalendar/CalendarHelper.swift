@@ -80,9 +80,9 @@ class CalendarHelper
         return calendar.date(byAdding: .day, value: -daysSinceMonday, to: date)!
     }
     
-    func eventsForDate(eventsList: [Event], date: Date) -> [Event]
+    func eventsForDate(eventsList: [UniversalEvent], date: Date) -> [UniversalEvent]
     {
-        var daysEvents = [Event]()
+        var daysEvents = [UniversalEvent]()
         for event in eventsList
         {
             if(Calendar.current.isDate(event.date, inSameDayAs:date))

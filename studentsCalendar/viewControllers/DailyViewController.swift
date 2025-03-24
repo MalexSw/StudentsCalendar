@@ -1,7 +1,7 @@
 import UIKit
 
 protocol EventInformationParseDelegate: AnyObject {
-    func userDidChooseConcreteEvent(event: Event)
+    func userDidChooseConcreteEvent(event: UniversalEvent)
 }
 
 class DailyViewController: UIViewController, UITableViewDelegate, UITableViewDataSource {
@@ -18,7 +18,7 @@ class DailyViewController: UIViewController, UITableViewDelegate, UITableViewDat
     let showEventDetail = "showEventDetail"
     let dailyController = "dailyController"
     var totalEventsAmount: Int = 0
-    var dailyEvents:[Event] = []
+    var dailyEvents:[UniversalEvent] = []
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -81,7 +81,7 @@ class DailyViewController: UIViewController, UITableViewDelegate, UITableViewDat
         }
     }
     
-    func deleteEvent(_ event: Event) {
+    func deleteEvent(_ event: UniversalEvent) {
         var customEventsSaved = loadCustomEventsFromUserDefaults()
         if customEventsSaved.contains(where: { $0.id == event.id }) {
             customEventsSaved.removeAll { $0.id == event.id}
@@ -105,7 +105,7 @@ class DailyViewController: UIViewController, UITableViewDelegate, UITableViewDat
         let dateFormatter = DateFormatter()
         dateFormatter.dateFormat = "HH:mm"
         let eventTime = dateFormatter.string(from: event.date)
-        cell.eventLabel.text = "\(eventTime) - \(event.name!)"
+        cell.eventLabel.text = "\(eventTime) - \(event.name)"
         return cell
     }
     
@@ -131,7 +131,7 @@ class DailyViewController: UIViewController, UITableViewDelegate, UITableViewDat
         if segue.identifier == showEventDetail,
            let destinationVC = segue.destination as? EventDetailViewController,
            let eventToPass = sender {
-            destinationVC.event = eventToPass as! Event
+            destinationVC.event = eventToPass as! UniversalEvent
             destinationVC.delegate = self
         } else if segue.identifier == dailyController,
             let destinationVC = segue.destination as? EventEditViewController,
@@ -143,7 +143,7 @@ class DailyViewController: UIViewController, UITableViewDelegate, UITableViewDat
 }
 
 extension DailyViewController: EventInformationParseDelegate {
-    func userDidChooseConcreteEvent(event: Event) {
+    func userDidChooseConcreteEvent(event: UniversalEvent) {
         print("Event \(event)")
     }
 }

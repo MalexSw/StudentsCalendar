@@ -48,9 +48,9 @@ func loadScheduleURL() -> String? {
     return UserDefaults.standard.string(forKey: "scheduleURL")
 }
 
-func parseICSEvents(icsData: String) -> [UniEvent] {
+func parseICSEvents(icsData: String) -> [UniversalEvent] {
     let lines = icsData.components(separatedBy: CharacterSet.newlines)
-    var events: [UniEvent] = []
+    var events: [UniversalEvent] = []
 
     var summary = ""
     var start = ""
@@ -102,7 +102,7 @@ func parseICSEvents(icsData: String) -> [UniEvent] {
             dateFormatter.timeZone = TimeZone.current
             var eventDate = dateFormatter.date(from: start)// Default to current date if parsing fails
             
-            let event = UniEvent(id: events.count + 1, // Unique ID
+            let event = UniversalEvent(id: events.count + 1, // Unique ID
                                  name: summary,
                                  date: eventDate!,
                                  summary: summary,

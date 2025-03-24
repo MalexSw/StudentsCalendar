@@ -2,7 +2,7 @@ import UIKit
 
 class EventDetailViewController: UIViewController {
     
-    var event: Event?
+    var event: UniversalEvent?
 
     @IBOutlet weak var eventSummary: UILabel!
     @IBOutlet weak var eventBegin: UILabel!
@@ -15,27 +15,6 @@ class EventDetailViewController: UIViewController {
     }
     
     func viewControllerSetup() {
-        if let uniEvent = event as? UniEvent {
-            print("Received a UniEvent: \(uniEvent)")
-        } else if let customEvent = event as? CustomEvent {
-            print("Received a CustomEvent: \(customEvent)")
-        } else {
-            print("Received an unknown Event type")
-        }
-
-//        if let uniEvent = event as? UniEvent {
-//            eventSummary.text = uniEvent.summary
-//            eventBegin.text = uniEvent.start
-//            eventEnd.text = uniEvent.end
-//            print("Received UniEvent:", uniEvent)
-//        } else if let normalEvent = event as? CustomEvent {
-//            eventSummary.text = normalEvent.name
-//            eventBegin.text = dateToString(normalEvent.date)
-//            eventEnd.text = "Unknown End Time"
-//            print("Received Event:", normalEvent)
-//        } else {
-//            print("Unknown event type")
-//        }
         eventSummary.text = event!.name
         eventBegin.text = dateToString(event!.date)
         eventEnd.text = "Not mentioned"

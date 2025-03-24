@@ -1,7 +1,7 @@
 import UIKit
 
 protocol CalendarInformationParseDelegate: AnyObject {
-    func userDidChooseConcreteDay(events: [Event])
+    func userDidChooseConcreteDay(events: [UniversalEvent])
 }
 
 class MonthlyViewController: UIViewController, UICollectionViewDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout {
@@ -187,7 +187,7 @@ class MonthlyViewController: UIViewController, UICollectionViewDelegate, UIColle
 }
 
 extension MonthlyViewController: CalendarInformationParseDelegate {
-    func userDidChooseConcreteDay(events: [Event]) {
+    func userDidChooseConcreteDay(events: [UniversalEvent]) {
         print("Received events from DailyViewController:", events)
     }
 }

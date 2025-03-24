@@ -107,7 +107,7 @@ class WeeklyViewController: UIViewController, UICollectionViewDelegate, UICollec
         return false
     }
     
-    func deleteEvent(_ event: Event) {
+    func deleteEvent(_ event: UniversalEvent) {
         var customEventsSaved = loadCustomEventsFromUserDefaults()
         if customEventsSaved.contains(where: { $0.id == event.id }) {
             customEventsSaved.removeAll { $0.id == event.id}
@@ -156,7 +156,7 @@ class WeeklyViewController: UIViewController, UICollectionViewDelegate, UICollec
         if segue.identifier == showEventDetail,
            let destinationVC = segue.destination as? EventDetailViewController,
            let eventToPass = sender {
-            destinationVC.event = eventToPass as! Event
+            destinationVC.event = eventToPass as! UniversalEvent
             destinationVC.delegate = self
         } else if segue.identifier == weekController,
                   let destinationVC = segue.destination as? EventEditViewController,
@@ -177,7 +177,7 @@ class WeeklyViewController: UIViewController, UICollectionViewDelegate, UICollec
 }
 
 extension WeeklyViewController: EventInformationParseDelegate {
-    func userDidChooseConcreteEvent(event: Event) {
+    func userDidChooseConcreteEvent(event: UniversalEvent) {
         print("Event \(event)")
     }
     

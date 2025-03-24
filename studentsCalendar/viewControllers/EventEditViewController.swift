@@ -56,7 +56,7 @@ class EventEditViewController: UIViewController
         let id = eventsList.count
         let date = datePicker.date
 
-        let newEvent = CustomEvent(id: id, name: summary, date: date, summary: summary, start: start, end: end, location: location, isEventOblig: isEventOblig)
+        let newEvent = UniversalEvent(id: id, name: summary, date: date, summary: summary, start: start, end: end, location: location, isEventOblig: isEventOblig)
 
         var savedEvents = loadCustomEventsFromUserDefaults()
         savedEvents.append(newEvent)
