@@ -58,9 +58,11 @@ func parseICSEvents(icsData: String) -> [UniversalEvent] {
     var location = ""
     var roomNumber = ""
     var buildingName = ""
+    let eventType = EventType.scheduleDownloaded
     var isEventOblig = true
 
     for line in lines {
+        print(line)
         let trimmed = line.trimmingCharacters(in: .whitespacesAndNewlines)
         
         if trimmed.isEmpty { continue }
@@ -80,38 +82,35 @@ func parseICSEvents(icsData: String) -> [UniversalEvent] {
         } else if trimmed.hasPrefix("LOCATION:") {
             location = String(trimmed.dropFirst(9))
         } else if trimmed.hasPrefix("DESCRIPTION:") {
-            if let roomRange = trimmed.range(of: "Room: ") {
-                let roomSubstring = trimmed[roomRange.upperBound...]
-                let roomParts = roomSubstring.components(separatedBy: "\\n").filter { !$0.isEmpty }
-                if let room = roomParts.first {
-                    roomNumber = room.trimmingCharacters(in: .whitespaces)
-                }
+            let descriptionContent = String(trimmed.dropFirst(12))  // Remove "DESCRIPTION:"
+            let descriptionLines = descriptionContent.components(separatedBy: "\\n")
+
+            if descriptionLines.count > 0 {
+                roomNumber = descriptionLines[0].replacingOccurrences(of: "Sala: ", with: "").trimmingCharacters(in: .whitespaces)
             }
-            
-            if let buildingRange = trimmed.range(of: "Room: ") {
-                let buildingSubstring = trimmed[buildingRange.lowerBound...]
-                let buildingParts = buildingSubstring.components(separatedBy: "\\n").filter { !$0.isEmpty }
-                if buildingParts.count > 1 {
-                     buildingName = String(buildingParts[1])
-                }
+            if descriptionLines.count > 1 {
+                buildingName = descriptionLines[1].trimmingCharacters(in: .whitespaces)
             }
         } else if trimmed == "END:VEVENT" {
             // Convert start string to Date
             let dateFormatter = DateFormatter()
             dateFormatter.dateFormat = "yyyy-MM-dd HH:mm"
             dateFormatter.timeZone = TimeZone.current
-            var eventDate = dateFormatter.date(from: start)// Default to current date if parsing fails
-            
-            let event = UniversalEvent(id: events.count + 1, // Unique ID
-                                 name: summary,
-                                 date: eventDate!,
-                                 summary: summary,
-                                 start: start,
-                                 end: end,
-                                 roomNumber: roomNumber,
-                                 building: buildingName,
-                                 location: location,
-                                 isEventOblig: isEventOblig)
+            let eventDate = dateFormatter.date(from: start)// Default to current date if parsing fails
+
+            let event = UniversalEvent(
+                id: events.count + 1,
+                name: summary,
+                date: eventDate!,
+                eventType: eventType,
+                summary: summary,
+                start: start,
+                end: end,
+                roomNumber: roomNumber,
+                building: buildingName,
+                location: location,
+                isEventOblig: isEventOblig
+            )
             
             events.append(event)
 
@@ -125,6 +124,7 @@ func parseICSEvents(icsData: String) -> [UniversalEvent] {
             isEventOblig = true
         }
     }
+
 
     print("Total events found: \(events.count)")
     return events

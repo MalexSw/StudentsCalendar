@@ -31,7 +31,7 @@ class MonthlyViewController: UIViewController, UICollectionViewDelegate, UIColle
         collectionView.register(MonthlyCollectionViewCell.nib(), forCellWithReuseIdentifier: "MonthlyCollectionViewCell")
         checkAndRequestScheduleURL()
         uploadAndParseEvents()
-        eventsList = loadTheWholeList()
+        loadTheWholeList()
 //        let longPressGesture = UILongPressGestureRecognizer(target: self, action: #selector(handleLongPress))
 //            collectionView.addGestureRecognizer(longPressGesture)
         

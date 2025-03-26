@@ -43,8 +43,10 @@ func loadCustomEventsFromUserDefaults() -> [UniversalEvent] {
 }
 
 // Load the Whole List (Combined Events)
-func loadTheWholeList() -> [UniversalEvent] {
+func loadTheWholeList() {
     var allEvents = loadScheduleEventsFromUserDefaults() + loadCustomEventsFromUserDefaults()
     allEvents.sort { $0.date < $1.date }
-    return allEvents
+    eventsList = allEvents
 }
+
+

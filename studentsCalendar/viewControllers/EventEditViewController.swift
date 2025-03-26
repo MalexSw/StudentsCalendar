@@ -14,7 +14,8 @@ class EventEditViewController: UIViewController
     weak var delegate: DateForAddParseDelegate!
     
     @IBOutlet weak var nameTF: UITextField!
-    @IBOutlet weak var datePicker: UIDatePicker!
+    @IBOutlet weak var eventStartdatePicker: UIDatePicker!
+    @IBOutlet weak var eventEnddatePicker: UIDatePicker!
     @IBOutlet weak var locationTF: UITextField!
     @IBOutlet weak var shortDescTF: UITextField!
     @IBOutlet weak var notatesTF: UITextField!
@@ -22,7 +23,7 @@ class EventEditViewController: UIViewController
     override func viewDidLoad()
     {
         super.viewDidLoad()
-        datePicker.date = date ?? selectedDate
+        eventStartdatePicker.date = date ?? selectedDate
     }
     
     @IBAction func saveAction(_ sender: Any) {
@@ -32,6 +33,7 @@ class EventEditViewController: UIViewController
         var location: String = ""
         var notates: String = ""
         var shortDescr: String = ""
+        var eventType = EventType.userCreated
         var isEventOblig: Bool = true
 
         if let name = nameTF.text, !name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
@@ -54,16 +56,18 @@ class EventEditViewController: UIViewController
         }
 
         let id = eventsList.count
-        let date = datePicker.date
+        date = eventStartdatePicker.date
+        start = dateToString(eventStartdatePicker.date)
+        end = dateToString(eventEnddatePicker.date)
 
-        let newEvent = UniversalEvent(id: id, name: summary, date: date, summary: summary, start: start, end: end, location: location, isEventOblig: isEventOblig)
+        let newEvent = UniversalEvent(id: id, name: summary, date: date ?? selectedDate, eventType: eventType, summary: summary, start: start, end: end, location: location, shortDescription: shortDescr, notates: notates, isEventOblig: isEventOblig)
 
         var savedEvents = loadCustomEventsFromUserDefaults()
         savedEvents.append(newEvent)
         savedEvents.sort { $0.date < $1.date }
 
         saveCustomEventsToUserDefaults(events: savedEvents)
-        eventsList = loadTheWholeList()
+        loadTheWholeList()
 
         navigationController?.popViewController(animated: true)
     }
@@ -74,7 +78,12 @@ class EventEditViewController: UIViewController
         alert.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))
         present(alert, animated: true, completion: nil)
     }
-
-
+    
+    func dateToString(_ date: Date) -> String {
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "HH:mm"
+        let eventTime = dateFormatter.string(from: date)
+        return eventTime
+    }
 
 }

@@ -10,4 +10,5 @@ import UIKit
 class DailyTableViewCell: UITableViewCell {
 
     @IBOutlet weak var eventLabel: UILabel!
+    @IBOutlet weak var descriptionLabel: UILabel!
 }

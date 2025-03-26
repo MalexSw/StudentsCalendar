@@ -18,7 +18,7 @@ class WeeklyViewController: UIViewController, UICollectionViewDelegate, UICollec
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        eventsList = loadTheWholeList()
+        loadTheWholeList()
         setCellsView()
         Task {
             await setWeekView()
@@ -112,7 +112,7 @@ class WeeklyViewController: UIViewController, UICollectionViewDelegate, UICollec
         if customEventsSaved.contains(where: { $0.id == event.id }) {
             customEventsSaved.removeAll { $0.id == event.id}
             saveCustomEventsToUserDefaults(events: customEventsSaved)
-            eventsList = loadTheWholeList()
+            loadTheWholeList()
             updateEvents()
             print("Event found, proceed with deletion")
             // Perform deletion logic here
@@ -128,12 +128,15 @@ class WeeklyViewController: UIViewController, UICollectionViewDelegate, UICollec
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "cellID") as! EventCell
         let event = CalendarHelper().eventsForDate(eventsList: eventsList, date: selectedDate)[indexPath.row]
-        
         let dateFormatter = DateFormatter()
         dateFormatter.dateFormat = "HH:mm"
-        
         let eventTime = dateFormatter.string(from: event.date)
-        cell.eventLabel.text = "\(eventTime) - \(event.name ?? "")"
+        cell.eventLabel.text = "\(eventTime) - \(event.name)"
+        if event.eventType == EventType.scheduleDownloaded {
+            cell.descriptionLabel.text = "Building \(event.building ?? "Unknown"), room \(event.roomNumber ?? "Unknown")"
+        } else if event.eventType == EventType.userCreated {
+            cell.descriptionLabel.text = event.shortDescription
+        }
         
         return cell
     }

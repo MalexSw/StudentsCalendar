@@ -22,7 +22,7 @@ class DailyViewController: UIViewController, UITableViewDelegate, UITableViewDat
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        eventsList = loadTheWholeList()
+        loadTheWholeList()
         NotificationCenter.default.addObserver(self, selector: #selector(updateEvents), name: NSNotification.Name("EventsUpdated"), object: nil)
         Task {
             await updateEventsList()
@@ -86,7 +86,7 @@ class DailyViewController: UIViewController, UITableViewDelegate, UITableViewDat
         if customEventsSaved.contains(where: { $0.id == event.id }) {
             customEventsSaved.removeAll { $0.id == event.id}
             saveCustomEventsToUserDefaults(events: customEventsSaved)
-            eventsList = loadTheWholeList()
+            loadTheWholeList()
             updateEvents()
             print("Event found, proceed with deletion")
             // Perform deletion logic here
@@ -106,6 +106,11 @@ class DailyViewController: UIViewController, UITableViewDelegate, UITableViewDat
         dateFormatter.dateFormat = "HH:mm"
         let eventTime = dateFormatter.string(from: event.date)
         cell.eventLabel.text = "\(eventTime) - \(event.name)"
+        if event.eventType == EventType.scheduleDownloaded {
+            cell.descriptionLabel.text = "Building \(event.building ?? "Unknown"), room \(event.roomNumber ?? "Unknown")"
+        } else if event.eventType == EventType.userCreated {
+            cell.descriptionLabel.text = event.shortDescription
+        }
         return cell
     }
     
@@ -131,11 +136,11 @@ class DailyViewController: UIViewController, UITableViewDelegate, UITableViewDat
         if segue.identifier == showEventDetail,
            let destinationVC = segue.destination as? EventDetailViewController,
            let eventToPass = sender {
-            destinationVC.event = eventToPass as! UniversalEvent
+            destinationVC.event = eventToPass as? UniversalEvent
             destinationVC.delegate = self
         } else if segue.identifier == dailyController,
             let destinationVC = segue.destination as? EventEditViewController,
-            let eventToPass = sender {
+                  let _ = sender {
             destinationVC.date = selectedDate
             destinationVC.delegate = self
         }
