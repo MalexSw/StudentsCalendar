@@ -22,12 +22,13 @@ class DailyViewController: UIViewController, UITableViewDelegate, UITableViewDat
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        loadTheWholeList()
-        NotificationCenter.default.addObserver(self, selector: #selector(updateEvents), name: NSNotification.Name("EventsUpdated"), object: nil)
         Task {
+            await loadTheWholeList()
             await updateEventsList()
             updateEvents()
         }
+        NotificationCenter.default.addObserver(self, selector: #selector(updateEvents), name: NSNotification.Name("EventsUpdated"), object: nil)
+        
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -63,8 +64,12 @@ class DailyViewController: UIViewController, UITableViewDelegate, UITableViewDat
     }
     
     @objc func updateEvents() {
-        self.totalEventsLabel.text = "Total events for today: \(CalendarHelper().eventsForDate(eventsList: eventsList, date: selectedDate!).count)"
-        tableView.reloadData()
+        guard let selectedDate = selectedDate else { return }
+        dailyEvents = CalendarHelper().eventsForDate(eventsList: eventsList, date: selectedDate) // Refresh data
+        DispatchQueue.main.async {
+            self.totalEventsLabel.text = "Total events for today: \(self.dailyEvents.count)"
+            self.tableView.reloadData()
+        }
     }
     
     @IBAction func nextDay(_ sender: Any) {
@@ -81,15 +86,19 @@ class DailyViewController: UIViewController, UITableViewDelegate, UITableViewDat
         }
     }
     
-    func deleteEvent(_ event: UniversalEvent) {
+    func deleteEvent(_ event: UniversalEvent) async {
         var customEventsSaved = loadCustomEventsFromUserDefaults()
-        if customEventsSaved.contains(where: { $0.id == event.id }) {
-            customEventsSaved.removeAll { $0.id == event.id}
-            saveCustomEventsToUserDefaults(events: customEventsSaved)
-            loadTheWholeList()
-            updateEvents()
+        
+        if let index = customEventsSaved.firstIndex(where: { $0.id == event.id }) {
+            customEventsSaved.remove(at: index)
+            await saveCustomEventsToUserDefaults(events: customEventsSaved)
+            await loadTheWholeList()
+            
+            DispatchQueue.main.async {
+                self.updateEvents() // Ensure UI reflects changes
+            }
+            
             print("Event found, proceed with deletion")
-            // Perform deletion logic here
         } else {
             print("Event not found")
         }
@@ -104,6 +113,7 @@ class DailyViewController: UIViewController, UITableViewDelegate, UITableViewDat
         let event = CalendarHelper().eventsForDate(eventsList: eventsList, date: selectedDate!)[indexPath.row]
         let dateFormatter = DateFormatter()
         dateFormatter.dateFormat = "HH:mm"
+        dateFormatter.timeZone = TimeZone(identifier: "UTC")
         let eventTime = dateFormatter.string(from: event.date)
         cell.eventLabel.text = "\(eventTime) - \(event.name)"
         if event.eventType == EventType.scheduleDownloaded {
@@ -122,11 +132,19 @@ class DailyViewController: UIViewController, UITableViewDelegate, UITableViewDat
     func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
         if editingStyle == .delete {
             let event = CalendarHelper().eventsForDate(eventsList: eventsList, date: selectedDate!)[indexPath.row]
-            deleteEvent(event)
+            
+            Task {
+                await deleteEvent(event) // Ensure event is deleted
+                await loadTheWholeList() // Reload entire list
+                DispatchQueue.main.async {
+                    self.updateEvents() // Ensure UI updates properly
+                }
+            }
             
             print("Deleted item at row \(indexPath.row)")
         }
     }
+
 
 
 

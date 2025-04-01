@@ -7,45 +7,61 @@
 
 import UIKit
 
-func uploadAndParseEvents() {
-    guard let urlString = loadScheduleURL(), !urlString.isEmpty else {
-        print("No schedule URL saved")
-        return
-    }
-
-    guard let url = URL(string: urlString) else {
-        print("Invalid URL")
-        return
-    }
-
-    let task = URLSession.shared.dataTask(with: url) { data, response, error in
-        if let error = error {
-            print("Error fetching calendar: \(error.localizedDescription)")
+func uploadAndParseEvents() async {
+    do {
+        tasksList = await loadHomeTasks()
+        guard let urlString = loadScheduleURL(), !urlString.isEmpty else {
+            print("No schedule URL saved")
             return
         }
+
+        guard let url = URL(string: urlString) else {
+            print("Invalid URL")
+            return
+        }
+
+        let (data, response) = try await URLSession.shared.data(from: url)
 
         guard let httpResponse = response as? HTTPURLResponse, (200...299).contains(httpResponse.statusCode) else {
             print("Server error: Invalid response")
             return
         }
 
-        guard let data = data, let icsString = String(data: data, encoding: .utf8) else {
+        guard let icsString = String(data: data, encoding: .utf8) else {
             print("Error decoding ICS data")
             return
         }
 
-        let events = parseICSEvents(icsData: icsString)
+        var events = parseICSEvents(icsData: icsString)
+        events = await associateTasksWithEvents(events) // Await async function
 
         DispatchQueue.main.async {
             eventsList = events  // Update global/local events list
             saveDownloadedEventsToUserDefaults(events: events) // Store in UserDefaults
         }
+    } catch {
+        print("Error fetching calendar: \(error.localizedDescription)")
     }
-    task.resume()
 }
 
 func loadScheduleURL() -> String? {
     return UserDefaults.standard.string(forKey: "scheduleURL")
+}
+
+func associateTasksWithEvents(_ events: [UniversalEvent]) async -> [UniversalEvent] {
+    var updatedEvents = events
+    let tasksList = await loadHomeTasks()
+    
+    for task in tasksList {
+        if let eventIndex = updatedEvents.firstIndex(where: { $0.date == task.date && $0.name == task.subject }) {
+            if updatedEvents[eventIndex].tasks == nil {
+                updatedEvents[eventIndex].tasks = []
+            }
+            updatedEvents[eventIndex].tasks.append(task)
+        }
+    }
+    
+    return updatedEvents
 }
 
 func parseICSEvents(icsData: String) -> [UniversalEvent] {
@@ -71,13 +87,11 @@ func parseICSEvents(icsData: String) -> [UniversalEvent] {
             summary = String(trimmed.dropFirst(8))
         } else if trimmed.hasPrefix("DTSTART") {
             if let range = trimmed.range(of: ":") {
-                let timeForDecode = String(trimmed[range.upperBound...])
-                start = decodeICSTime(timeForDecode)
+                start = decodeICSTime(String(trimmed[range.upperBound...]))
             }
         } else if trimmed.hasPrefix("DTEND") {
             if let range = trimmed.range(of: ":") {
-                let timeForDecode = String(trimmed[range.upperBound...])
-                end = decodeICSTime(timeForDecode)
+                end = decodeICSTime(String(trimmed[range.upperBound...]))
             }
         } else if trimmed.hasPrefix("LOCATION:") {
             location = String(trimmed.dropFirst(9))
@@ -92,16 +106,21 @@ func parseICSEvents(icsData: String) -> [UniversalEvent] {
                 buildingName = descriptionLines[1].trimmingCharacters(in: .whitespaces)
             }
         } else if trimmed == "END:VEVENT" {
-            // Convert start string to Date
+            print(start)
+            
             let dateFormatter = DateFormatter()
             dateFormatter.dateFormat = "yyyy-MM-dd HH:mm"
-            dateFormatter.timeZone = TimeZone.current
-            let eventDate = dateFormatter.date(from: start)// Default to current date if parsing fails
+            dateFormatter.timeZone = TimeZone(identifier: "UTC") // Treat input as absolute UTC time
+
+            guard let eventDate = dateFormatter.date(from: start) else {
+                print("Error parsing date for event: \(summary)")
+                continue
+            }
 
             let event = UniversalEvent(
                 id: events.count + 1,
                 name: summary,
-                date: eventDate!,
+                date: eventDate,
                 eventType: eventType,
                 summary: summary,
                 start: start,
@@ -124,11 +143,27 @@ func parseICSEvents(icsData: String) -> [UniversalEvent] {
             isEventOblig = true
         }
     }
-
-
+    
     print("Total events found: \(events.count)")
     return events
 }
+
+func decodeICSTime(_ icsTime: String) -> String {
+    let dateFormatter = DateFormatter()
+    dateFormatter.dateFormat = "yyyyMMdd'T'HHmmss"
+    dateFormatter.timeZone = TimeZone(identifier: "Europe/Warsaw") // Treating input as UTC
+
+    guard let date = dateFormatter.date(from: icsTime) else {
+        return "Invalid Date"
+    }
+
+    let outputFormatter = DateFormatter()
+    outputFormatter.dateFormat = "yyyy-MM-dd HH:mm"
+    outputFormatter.timeZone = TimeZone.current // Convert to the current local timezone
+
+    return outputFormatter.string(from: date)
+}
+
 
 // Theoreticaly useless
 
@@ -152,31 +187,49 @@ func parseICSEvents(icsData: String) -> [UniversalEvent] {
 //            newEvent.id = eventsList.count + 1
 //            newEvent.name = event.summary
 //            newEvent.date = eventDate
-//            
+//
 //            eventsList.append(newEvent)
 //        }
 //    }
-//    
+//
 //    DispatchQueue.main.async {
 //        NotificationCenter.default.post(name: NSNotification.Name("EventsUpdated"), object: nil)
 //    }
 //}
 //
 //
-func decodeICSTime(_ icsTime: String) -> String {
-    let dateFormatter = DateFormatter()
-    dateFormatter.dateFormat = "yyyyMMdd'T'HHmmss"
-    dateFormatter.timeZone = TimeZone(abbreviation: "UTC") // Read as UTC
+//func decodeICSTime(_ icsTime: String) -> String {
+//    let dateFormatter = DateFormatter()
+//    dateFormatter.dateFormat = "yyyyMMdd'T'HHmmss"
+//    dateFormatter.timeZone = TimeZone(abbreviation: "UTC") // Read as UTC
+//
+//    if let date = dateFormatter.date(from: icsTime) {
+//        let correctedDate = Calendar.current.date(byAdding: .hour, value: -2, to: date)! // Subtract 1 hour
+//        
+//        let outputFormatter = DateFormatter()
+//        outputFormatter.dateFormat = "yyyy-MM-dd HH:mm"
+//        outputFormatter.timeZone = TimeZone.current // Convert to local time zone
+//        
+//        return outputFormatter.string(from: correctedDate)
+//    } else {
+//        return "Invalid Date"
+//    }
+//}
 
-    if let date = dateFormatter.date(from: icsTime) {
-        let correctedDate = Calendar.current.date(byAdding: .hour, value: -1, to: date)! // Subtract 1 hour
-        
-        let outputFormatter = DateFormatter()
-        outputFormatter.dateFormat = "yyyy-MM-dd HH:mm"
-        outputFormatter.timeZone = TimeZone.current // Convert to local time zone
-        
-        return outputFormatter.string(from: correctedDate)
-    } else {
-        return "Invalid Date"
-    }
-}
+//func decodeICSTime(_ icsTime: String) -> String {
+//    let dateFormatter = DateFormatter()
+//    dateFormatter.dateFormat = "yyyyMMdd'T'HHmmss"
+//    dateFormatter.timeZone = TimeZone(identifier: "Europe/Warsaw") // Use Warsaw timezone directly
+//
+//    guard let date = dateFormatter.date(from: icsTime) else {
+//        return "Invalid Date"
+//    }
+//
+//    let outputFormatter = DateFormatter()
+//    outputFormatter.dateFormat = "yyyy-MM-dd HH:mm"
+//    outputFormatter.timeZone = TimeZone.current // Convert to the current local timezone
+//
+//    return outputFormatter.string(from: date)
+//}
+
+

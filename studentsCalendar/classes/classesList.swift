@@ -12,7 +12,14 @@ enum EventType: Codable {
     case userCreated
 }
 
+enum WayOfTaskPass: String, Codable, CaseIterable {
+    case online = "Online"
+    case selfStudy = "For self study"
+    case offline = "In class"
+}
+
 var eventsList = [UniversalEvent]()
+var tasksList = [HomeTask]()
 
 class UniversalEvent: Codable {
     var id: Int
@@ -30,8 +37,9 @@ class UniversalEvent: Codable {
     var shortDescription: String?
     var notates: String?
     var isEventOblig: Bool?
+    var tasks: [HomeTask?]
     
-    init(id: Int, name: String, date: Date, eventType: EventType? = nil, summary: String? = nil, start: String? = nil, end: String? = nil, roomNumber: String? = nil, building: String? = nil, location: String? = nil, shortDescription: String? = nil, notates: String? = nil, isEventOblig: Bool? = nil) {
+    init(id: Int, name: String, date: Date, eventType: EventType? = nil, summary: String? = nil, start: String? = nil, end: String? = nil, roomNumber: String? = nil, building: String? = nil, location: String? = nil, shortDescription: String? = nil, notates: String? = nil, isEventOblig: Bool? = nil, tasks: [HomeTask?] = []) {
         self.id = id
         self.name = name
         self.date = date
@@ -45,6 +53,7 @@ class UniversalEvent: Codable {
         self.shortDescription = shortDescription
         self.notates = notates
         self.isEventOblig = isEventOblig
+        self.tasks = tasks
     }
     
     required init(from decoder: Decoder) throws {
@@ -63,11 +72,76 @@ class UniversalEvent: Codable {
         self.building = try container.decodeIfPresent(String.self, forKey: .building)
         self.shortDescription = try container.decodeIfPresent(String.self, forKey: .shortDescription)
         self.notates = try container.decodeIfPresent(String.self, forKey: .notates)
+        self.tasks = try container.decode([HomeTask].self, forKey: .tasks)
     }
     
     enum CodingKeys: String, CodingKey {
         case id, name, date, summary, start, end, location, isEventOblig, eventType,
-        roomNumber, building, shortDescription, notates
+        roomNumber, building, shortDescription, notates, tasks
     }
 }
 
+class HomeTask: Codable {
+    var id: Int
+    var testName: String
+    var subject: String
+    var date: Date
+    var task: String
+    var description: String
+    var wayOfPassing: WayOfTaskPass
+    var additionalNotes: String?
+    
+    
+    init(id: Int, testName: String, subject: String, date: Date, task: String, description: String, wayOfPassing: WayOfTaskPass, additionalNotes: String? = nil) {
+        self.id = id
+        self.testName = testName
+        self.subject = subject
+        self.date = date
+        self.task = task
+        self.description = description
+        self.wayOfPassing = wayOfPassing
+        self.additionalNotes = additionalNotes
+    }
+    
+    required init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        
+        self.id = try container.decode(Int.self, forKey: .id)
+        self.testName = try container.decode(String.self, forKey: .testName)
+        self.subject = try container.decode(String.self, forKey: .subject)
+        self.date = try container.decode(Date.self, forKey: .date)
+        self.task = try container.decode(String.self, forKey: .task)
+        self.description = try container.decode(String.self, forKey: .description)
+        self.wayOfPassing = try container.decode(WayOfTaskPass.self, forKey: .wayOfPassing)
+        self.additionalNotes = try container.decodeIfPresent(String.self, forKey: .additionalNotes)
+    }
+    
+    enum CodingKeys: String, CodingKey {
+        case id, testName, subject, date, task, description, wayOfPassing, additionalNotes
+    }
+}
+
+//TODO: add image adding to task
+/*
+import UIKit
+
+class HomeTaskViewController: UIViewController, UIImagePickerControllerDelegate, UINavigationControllerDelegate {
+    
+    var homeTask = HomeTask(id: 1, testName: "Math Homework", date: Date(), task: "Solve problems", description: "Chapter 5")
+
+    @IBAction func addPhotoTapped(_ sender: UIButton) {
+        let imagePicker = UIImagePickerController()
+        imagePicker.delegate = self
+        imagePicker.sourceType = .photoLibrary // or .camera for camera
+        present(imagePicker, animated: true)
+    }
+
+    func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey: Any]) {
+        if let selectedImage = info[.originalImage] as? UIImage,
+           let imageData = selectedImage.jpegData(compressionQuality: 0.8) {
+            homeTask.images.append(imageData)
+        }
+        dismiss(animated: true)
+    }
+}
+*/

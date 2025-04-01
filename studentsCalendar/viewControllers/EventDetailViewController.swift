@@ -1,28 +1,36 @@
 import UIKit
 
-class EventDetailViewController: UIViewController {
-    
+class EventDetailViewController: UIViewController, UITableViewDelegate, UITableViewDataSource {
+
     var event: UniversalEvent?
+    var tasks: [HomeTask] = []
 
     @IBOutlet weak var eventSummary: UILabel!
-//    @IBOutlet weak var eventBegin: UILabel!
-//    @IBOutlet weak var eventEnd: UILabel!
     @IBOutlet weak var dateLabel: UILabel!
     @IBOutlet weak var shortDescLabel: UILabel!
     @IBOutlet weak var eventTime: UILabel!
     @IBOutlet weak var locationLabel: UILabel!
-    @IBOutlet weak var notatesTextField: UITextField!
+    @IBOutlet weak var tableView: UITableView!
     weak var delegate: EventInformationParseDelegate?
 
     override func viewDidLoad() {
         super.viewDidLoad()
         viewControllerSetup()
+        tableView.register(TaskPrewatchViewCell.nib(), forCellReuseIdentifier: "taskCell")
+        //tableView.register(TaskPrewatchViewCell.nib(), forCellReuseIdentifier: <#T##String#>)
         if event?.eventType == EventType.userCreated {
             print("Custom event")
         } else if event?.eventType == EventType.scheduleDownloaded {
             print("Schedule event")
         }
+        tasksListSetUp(event!)
+        print(event?.tasks)
+        
     }
+//    override func viewWillAppear(_ animated: Bool) {
+//        tasksListSetUp(event ?? nil)
+//        print(event?.tasks)
+//    }
     
     func viewControllerSetup() {
         if let demonstrEvent = event {
@@ -32,7 +40,6 @@ class EventDetailViewController: UIViewController {
             } else {
                 eventTime.text = "\(demonstrEvent.start!) - \(demonstrEvent.end!)"
             }
-            //eventTime.text = "\(eventBegin!) - \(eventEnd!)"
             let eventDateConverted = getDayNameAndDate(from: demonstrEvent.date)
             dateLabel.text = "\(eventDateConverted.dayName), \(eventDateConverted.formattedDate)"
             if demonstrEvent.eventType == EventType.userCreated {
@@ -46,12 +53,12 @@ class EventDetailViewController: UIViewController {
         
     }
     
-//    func dateToString(_ date: Date) -> String {
-//        let dateFormatter = DateFormatter()
-//        dateFormatter.dateFormat = "HH:mm"
-//        let eventTime = dateFormatter.string(from: date)
-//        return eventTime
-//    }
+    func tasksListSetUp(_ event: UniversalEvent?) {
+        if let eventForTask = event {
+            tasks = eventForTask.tasks.compactMap { $0 } // Removes nil values safely
+        }
+        
+    }
     
     func extractTime(from dateString: String) -> String? {
         let inputFormatter = DateFormatter()
@@ -66,13 +73,30 @@ class EventDetailViewController: UIViewController {
     
     func getDayNameAndDate(from date: Date) -> (dayName: String, formattedDate: String) {
         let formatter = DateFormatter()
+        formatter.timeZone = TimeZone(identifier: "UTC")
 
-        formatter.dateFormat = "EEEE" // Full weekday name (e.g., Monday)
+        formatter.dateFormat = "EEEE"
         let dayName = formatter.string(from: date)
 
-        formatter.dateFormat = "d MMMM" // Example: 25 June 2025
+        formatter.dateFormat = "d MMMM"
         let formattedDate = formatter.string(from: date)
 
         return (dayName, formattedDate)
     }
+    
+    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        print(tasks.count)
+        return tasks.count
+    }
+    
+    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+                let cell = tableView.dequeueReusableCell(withIdentifier: "taskCell") as! TaskPrewatchViewCell
+                let taskForCell = tasks[indexPath.row]
+                cell.taskName.text = "\(taskForCell.testName)"
+                cell.typeOfPass.text = "\(taskForCell.wayOfPassing)"
+                cell.shortTaskDescr.text = "\(taskForCell.task)"
+                return cell
+    }
+    
+    
 }

@@ -27,49 +27,51 @@ class EventEditViewController: UIViewController
     }
     
     @IBAction func saveAction(_ sender: Any) {
-        var summary: String = ""
-        var start: String = ""
-        var end: String = ""
-        var location: String = ""
-        var notates: String = ""
-        var shortDescr: String = ""
-        var eventType = EventType.userCreated
-        var isEventOblig: Bool = true
-
-        if let name = nameTF.text, !name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-            summary = name
+        Task { @MainActor in
+            var summary: String = ""
+            var start: String = ""
+            var end: String = ""
+            var location: String = ""
+            var notates: String = ""
+            var shortDescr: String = ""
+            var eventType = EventType.userCreated
+            var isEventOblig: Bool = true
+            
+            if let name = nameTF.text, !name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                summary = name
+            }
+            if let loc = locationTF.text {
+                location = loc
+            }
+            if let shortDesc = shortDescTF.text, !shortDesc.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                shortDescr = shortDesc
+            }
+            if let notes = notatesTF.text {
+                notates = notes
+            }
+            
+            // Check if both name and short description are empty
+            if summary.isEmpty && shortDescr.isEmpty {
+                showAlert(message: "You need to add at least one of those fields: Name or Short Description.")
+                return
+            }
+            
+            let id = eventsList.count
+            date = eventStartdatePicker.date
+            start = dateToString(eventStartdatePicker.date)
+            end = dateToString(eventEnddatePicker.date)
+            
+            let newEvent = UniversalEvent(id: id, name: summary, date: date!, eventType: eventType, summary: summary, start: start, end: end, location: location, shortDescription: shortDescr, notates: notates, isEventOblig: isEventOblig)
+            
+            var savedEvents = loadCustomEventsFromUserDefaults()
+            savedEvents.append(newEvent)
+            savedEvents.sort { $0.date < $1.date }
+            
+            await saveCustomEventsToUserDefaults(events: savedEvents)
+            await loadTheWholeList()
+            
+            navigationController?.popViewController(animated: true)
         }
-        if let loc = locationTF.text {
-            location = loc
-        }
-        if let shortDesc = shortDescTF.text, !shortDesc.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-            shortDescr = shortDesc
-        }
-        if let notes = notatesTF.text {
-            notates = notes
-        }
-
-        // Check if both name and short description are empty
-        if summary.isEmpty && shortDescr.isEmpty {
-            showAlert(message: "You need to add at least one of those fields: Name or Short Description.")
-            return
-        }
-
-        let id = eventsList.count
-        date = eventStartdatePicker.date
-        start = dateToString(eventStartdatePicker.date)
-        end = dateToString(eventEnddatePicker.date)
-
-        let newEvent = UniversalEvent(id: id, name: summary, date: date ?? selectedDate, eventType: eventType, summary: summary, start: start, end: end, location: location, shortDescription: shortDescr, notates: notates, isEventOblig: isEventOblig)
-
-        var savedEvents = loadCustomEventsFromUserDefaults()
-        savedEvents.append(newEvent)
-        savedEvents.sort { $0.date < $1.date }
-
-        saveCustomEventsToUserDefaults(events: savedEvents)
-        loadTheWholeList()
-
-        navigationController?.popViewController(animated: true)
     }
 
     // Function to show an alert

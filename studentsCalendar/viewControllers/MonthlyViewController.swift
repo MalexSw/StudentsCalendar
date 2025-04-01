@@ -30,17 +30,22 @@ class MonthlyViewController: UIViewController, UICollectionViewDelegate, UIColle
         super.viewDidLoad()
         collectionView.register(MonthlyCollectionViewCell.nib(), forCellWithReuseIdentifier: "MonthlyCollectionViewCell")
         checkAndRequestScheduleURL()
-        uploadAndParseEvents()
-        loadTheWholeList()
+//        Task {
+//            await uploadAndParseEvents()
+//            await loadTheWholeList()
+//            await setMonthView()
+//        }
+        
 //        let longPressGesture = UILongPressGestureRecognizer(target: self, action: #selector(handleLongPress))
 //            collectionView.addGestureRecognizer(longPressGesture)
         
-//        UserDefaults.standard.removeObject(forKey: "savedLoadedEvents")
+//        UserDefaults.standard.removeObject(forKey: "savedTasks")
 //        UserDefaults.standard.synchronize()
 //        UserDefaults.standard.removeObject(forKey: "savedCustomEvents")
 //        UserDefaults.standard.synchronize()
-//        UserDefaults.standard.removeObject(forKey: "scheduleURL")
+//        UserDefaults.standard.removeObject(forKey: "savedLoadedEvents")
 //        UserDefaults.standard.synchronize()
+        
         
         
     }
@@ -58,6 +63,8 @@ class MonthlyViewController: UIViewController, UICollectionViewDelegate, UIColle
     
     override func viewWillAppear(_ animated: Bool) {
         Task {
+            await uploadAndParseEvents()
+            await loadTheWholeList()
             await setMonthView()
         }
     }

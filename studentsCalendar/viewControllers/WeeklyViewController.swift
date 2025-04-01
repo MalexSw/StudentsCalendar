@@ -18,9 +18,9 @@ class WeeklyViewController: UIViewController, UICollectionViewDelegate, UICollec
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        loadTheWholeList()
-        setCellsView()
         Task {
+            await loadTheWholeList()
+            await setCellsView()
             await setWeekView()
 //            await uploadAndParseEvents()
         }
@@ -107,12 +107,12 @@ class WeeklyViewController: UIViewController, UICollectionViewDelegate, UICollec
         return false
     }
     
-    func deleteEvent(_ event: UniversalEvent) {
+    func deleteEvent(_ event: UniversalEvent) async {
         var customEventsSaved = loadCustomEventsFromUserDefaults()
         if customEventsSaved.contains(where: { $0.id == event.id }) {
             customEventsSaved.removeAll { $0.id == event.id}
-            saveCustomEventsToUserDefaults(events: customEventsSaved)
-            loadTheWholeList()
+            await saveCustomEventsToUserDefaults(events: customEventsSaved)
+            await loadTheWholeList()
             updateEvents()
             print("Event found, proceed with deletion")
             // Perform deletion logic here
@@ -130,6 +130,7 @@ class WeeklyViewController: UIViewController, UICollectionViewDelegate, UICollec
         let event = CalendarHelper().eventsForDate(eventsList: eventsList, date: selectedDate)[indexPath.row]
         let dateFormatter = DateFormatter()
         dateFormatter.dateFormat = "HH:mm"
+        dateFormatter.timeZone = TimeZone(identifier: "UTC")
         let eventTime = dateFormatter.string(from: event.date)
         cell.eventLabel.text = "\(eventTime) - \(event.name)"
         if event.eventType == EventType.scheduleDownloaded {
@@ -169,10 +170,10 @@ class WeeklyViewController: UIViewController, UICollectionViewDelegate, UICollec
         }
     }
     
-    func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
+    func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) async {
         if editingStyle == .delete {
             let event = CalendarHelper().eventsForDate(eventsList: eventsList, date: selectedDate)[indexPath.row]
-            deleteEvent(event)
+            await deleteEvent(event)
             
             print("Deleted item at row \(indexPath.row)")
         }
