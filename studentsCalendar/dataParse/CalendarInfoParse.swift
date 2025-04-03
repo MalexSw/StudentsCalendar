@@ -37,8 +37,9 @@ func uploadAndParseEvents() async {
 
         DispatchQueue.main.async {
             eventsList = events  // Update global/local events list
-            saveDownloadedEventsToUserDefaults(events: events) // Store in UserDefaults
+             // Store in UserDefaults
         }
+        await saveDownloadedEventsToUserDefaults(events: events)
     } catch {
         print("Error fetching calendar: \(error.localizedDescription)")
     }
@@ -57,7 +58,9 @@ func associateTasksWithEvents(_ events: [UniversalEvent]) async -> [UniversalEve
             if updatedEvents[eventIndex].tasks == nil {
                 updatedEvents[eventIndex].tasks = []
             }
-            updatedEvents[eventIndex].tasks.append(task)
+            if task.isDeleted != true {
+                updatedEvents[eventIndex].tasks.append(task)
+            }
         }
     }
     
@@ -151,7 +154,7 @@ func parseICSEvents(icsData: String) -> [UniversalEvent] {
 func decodeICSTime(_ icsTime: String) -> String {
     let dateFormatter = DateFormatter()
     dateFormatter.dateFormat = "yyyyMMdd'T'HHmmss"
-    dateFormatter.timeZone = TimeZone(identifier: "Europe/Warsaw") // Treating input as UTC
+    dateFormatter.timeZone = TimeZone(identifier: "Warsaw/Europe") // Treating input as UTC
 
     guard let date = dateFormatter.date(from: icsTime) else {
         return "Invalid Date"

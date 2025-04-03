@@ -121,6 +121,11 @@ class DailyViewController: UIViewController, UITableViewDelegate, UITableViewDat
         } else if event.eventType == EventType.userCreated {
             cell.descriptionLabel.text = event.shortDescription
         }
+        if event.tasks.isEmpty {
+            cell.taskMark.text = ""
+        } else {
+            cell.taskMark.text = "!"
+        }
         return cell
     }
     

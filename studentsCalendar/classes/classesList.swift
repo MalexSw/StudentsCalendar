@@ -89,10 +89,11 @@ class HomeTask: Codable {
     var task: String
     var description: String
     var wayOfPassing: WayOfTaskPass
+    var isDeleted: Bool
     var additionalNotes: String?
     
     
-    init(id: Int, testName: String, subject: String, date: Date, task: String, description: String, wayOfPassing: WayOfTaskPass, additionalNotes: String? = nil) {
+    init(id: Int, testName: String, subject: String, date: Date, task: String, description: String, wayOfPassing: WayOfTaskPass, isDeleted: Bool, additionalNotes: String? = nil) {
         self.id = id
         self.testName = testName
         self.subject = subject
@@ -100,6 +101,7 @@ class HomeTask: Codable {
         self.task = task
         self.description = description
         self.wayOfPassing = wayOfPassing
+        self.isDeleted = isDeleted
         self.additionalNotes = additionalNotes
     }
     
@@ -113,11 +115,12 @@ class HomeTask: Codable {
         self.task = try container.decode(String.self, forKey: .task)
         self.description = try container.decode(String.self, forKey: .description)
         self.wayOfPassing = try container.decode(WayOfTaskPass.self, forKey: .wayOfPassing)
+        self.isDeleted = try container.decode(Bool.self, forKey: .isDeleted)
         self.additionalNotes = try container.decodeIfPresent(String.self, forKey: .additionalNotes)
     }
     
     enum CodingKeys: String, CodingKey {
-        case id, testName, subject, date, task, description, wayOfPassing, additionalNotes
+        case id, testName, subject, date, task, description, wayOfPassing, isDeleted, additionalNotes
     }
 }
 

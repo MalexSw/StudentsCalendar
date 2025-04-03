@@ -279,20 +279,29 @@
                                                     <nil key="textColor"/>
                                                     <nil key="highlightedColor"/>
                                                 </label>
+                                                <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" textAlignment="right" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="C6v-5G-YX9">
+                                                    <rect key="frame" x="308.33333333333331" y="24" width="64.666666666666686" height="31.333333333333329"/>
+                                                    <fontDescription key="fontDescription" type="system" weight="semibold" pointSize="26"/>
+                                                    <nil key="textColor"/>
+                                                    <nil key="highlightedColor"/>
+                                                </label>
                                             </subviews>
                                             <constraints>
                                                 <constraint firstItem="hKX-ln-7c1" firstAttribute="top" secondItem="VpW-gK-h50" secondAttribute="bottom" constant="8" id="29l-0M-WrS"/>
                                                 <constraint firstItem="VpW-gK-h50" firstAttribute="top" secondItem="MCf-SN-fJe" secondAttribute="top" constant="12" id="AZt-2f-Uqb"/>
+                                                <constraint firstAttribute="trailingMargin" secondItem="C6v-5G-YX9" secondAttribute="trailing" id="Fph-dV-b5I"/>
                                                 <constraint firstAttribute="trailingMargin" relation="greaterThanOrEqual" secondItem="VpW-gK-h50" secondAttribute="trailing" constant="20" id="PO7-25-RJg"/>
                                                 <constraint firstAttribute="trailing" relation="greaterThanOrEqual" secondItem="hKX-ln-7c1" secondAttribute="trailing" constant="20" id="Uf8-az-dwC"/>
                                                 <constraint firstAttribute="bottom" secondItem="hKX-ln-7c1" secondAttribute="bottom" constant="24" id="cqK-VP-jwR"/>
                                                 <constraint firstItem="hKX-ln-7c1" firstAttribute="leading" secondItem="MCf-SN-fJe" secondAttribute="leading" constant="20" symbolic="YES" id="lgF-2c-ECf"/>
+                                                <constraint firstItem="C6v-5G-YX9" firstAttribute="top" secondItem="MCf-SN-fJe" secondAttribute="topMargin" constant="13" id="pjM-J0-mQO"/>
                                                 <constraint firstItem="VpW-gK-h50" firstAttribute="leading" secondItem="MCf-SN-fJe" secondAttribute="leadingMargin" id="tWq-37-CTu"/>
                                             </constraints>
                                         </tableViewCellContentView>
                                         <connections>
                                             <outlet property="descriptionLabel" destination="hKX-ln-7c1" id="jci-06-1x2"/>
                                             <outlet property="eventLabel" destination="VpW-gK-h50" id="Bcm-E1-V8v"/>
+                                            <outlet property="taskMark" destination="C6v-5G-YX9" id="p78-1w-TNK"/>
                                         </connections>
                                     </tableViewCell>
                                 </prototypes>
@@ -501,9 +510,17 @@
                                                     <nil key="textColor"/>
                                                     <nil key="highlightedColor"/>
                                                 </label>
+                                                <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" textAlignment="right" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="hGP-lV-3zt">
+                                                    <rect key="frame" x="308.33333333333331" y="24" width="64.666666666666686" height="31.333333333333329"/>
+                                                    <fontDescription key="fontDescription" type="system" weight="semibold" pointSize="26"/>
+                                                    <nil key="textColor"/>
+                                                    <nil key="highlightedColor"/>
+                                                </label>
                                             </subviews>
                                             <constraints>
+                                                <constraint firstItem="hGP-lV-3zt" firstAttribute="top" secondItem="ccR-b2-hdb" secondAttribute="topMargin" constant="13" id="3qC-FI-NO9"/>
                                                 <constraint firstItem="Gng-jd-ojj" firstAttribute="leading" secondItem="ccR-b2-hdb" secondAttribute="leading" constant="32" id="5FY-LZ-inc"/>
+                                                <constraint firstItem="hGP-lV-3zt" firstAttribute="trailing" secondItem="ccR-b2-hdb" secondAttribute="trailingMargin" id="7CB-Eg-oim"/>
                                                 <constraint firstItem="qG7-2G-y0R" firstAttribute="leading" secondItem="ccR-b2-hdb" secondAttribute="leading" constant="32" id="Laz-d6-3NV"/>
                                                 <constraint firstAttribute="trailing" relation="greaterThanOrEqual" secondItem="Gng-jd-ojj" secondAttribute="trailing" constant="20" id="NRN-b0-Dg9"/>
                                                 <constraint firstItem="qG7-2G-y0R" firstAttribute="top" secondItem="Gng-jd-ojj" secondAttribute="bottom" constant="8" id="iHx-XW-fXX"/>
@@ -514,6 +531,7 @@
                                         <connections>
                                             <outlet property="descriptionLabel" destination="qG7-2G-y0R" id="7In-Ux-ylM"/>
                                             <outlet property="eventLabel" destination="Gng-jd-ojj" id="BV0-0x-Mlb"/>
+                                            <outlet property="taskMark" destination="hGP-lV-3zt" id="jg8-K9-Asm"/>
                                         </connections>
                                     </tableViewCell>
                                 </prototypes>
@@ -943,8 +961,8 @@
         </scene>
     </scenes>
     <inferredMetricsTieBreakers>
-        <segue reference="yGs-4H-l2w"/>
-        <segue reference="7pn-el-8zJ"/>
+        <segue reference="AbV-Kj-BCB"/>
+        <segue reference="pXJ-Dm-Ure"/>
     </inferredMetricsTieBreakers>
     <resources>
         <image name="arrowshape.backward.circle.fill" catalog="system" width="128" height="123"/>

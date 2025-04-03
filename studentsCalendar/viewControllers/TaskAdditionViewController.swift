@@ -55,6 +55,7 @@ class TaskAdditionViewController: UIViewController, UIPickerViewDelegate, UIPick
             var task: String
             var description: String
             var wayOfPassing: WayOfTaskPass
+            var isDeleted = false
             var additionalNotes: String?
             
             // Assign values from text fields if they are not empty
@@ -113,6 +114,7 @@ class TaskAdditionViewController: UIViewController, UIPickerViewDelegate, UIPick
                 task: task,
                 description: description,
                 wayOfPassing: wayOfPassing,
+                isDeleted: isDeleted,
                 additionalNotes: additionalNotes
             )
             
@@ -137,7 +139,7 @@ class TaskAdditionViewController: UIViewController, UIPickerViewDelegate, UIPick
                         }
                         
                     }
-                    saveDownloadedEventsToUserDefaults(events: scheduleEventslist)
+                    await saveDownloadedEventsToUserDefaults(events: scheduleEventslist)
                 } else {
                     var userEventslist: [UniversalEvent] = []
                     for events in localEventsList {

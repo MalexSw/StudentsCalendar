@@ -1,7 +1,7 @@
 import UIKit
 
 // Save Downloaded Events
-func saveDownloadedEventsToUserDefaults(events: [UniversalEvent]) {
+func saveDownloadedEventsToUserDefaults(events: [UniversalEvent]) async {
     let encoder = JSONEncoder()
     if let encoded = try? encoder.encode(events) {
         UserDefaults.standard.set(encoded, forKey: "savedLoadedEvents")

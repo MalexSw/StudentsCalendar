@@ -1,10 +1,10 @@
 import UIKit
 
 class EventDetailViewController: UIViewController, UITableViewDelegate, UITableViewDataSource {
-
+    
     var event: UniversalEvent?
     var tasks: [HomeTask] = []
-
+    
     @IBOutlet weak var eventSummary: UILabel!
     @IBOutlet weak var dateLabel: UILabel!
     @IBOutlet weak var shortDescLabel: UILabel!
@@ -12,12 +12,12 @@ class EventDetailViewController: UIViewController, UITableViewDelegate, UITableV
     @IBOutlet weak var locationLabel: UILabel!
     @IBOutlet weak var tableView: UITableView!
     weak var delegate: EventInformationParseDelegate?
-
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         viewControllerSetup()
         tableView.register(TaskPrewatchViewCell.nib(), forCellReuseIdentifier: "taskCell")
-        //tableView.register(TaskPrewatchViewCell.nib(), forCellReuseIdentifier: <#T##String#>)
+        //tableView.register(TaskPrewatchViewCell.nib(), forCellReuseIdentifier: })
         if event?.eventType == EventType.userCreated {
             print("Custom event")
         } else if event?.eventType == EventType.scheduleDownloaded {
@@ -27,10 +27,11 @@ class EventDetailViewController: UIViewController, UITableViewDelegate, UITableV
         print(event?.tasks)
         
     }
-//    override func viewWillAppear(_ animated: Bool) {
-//        tasksListSetUp(event ?? nil)
-//        print(event?.tasks)
-//    }
+    //    override func viewWillAppear(_ animated: Bool) {
+    //        tasksListSetUp(event ?? nil)
+    //        print(event?.tasks)
+    //    }
+
     
     func viewControllerSetup() {
         if let demonstrEvent = event {
@@ -55,10 +56,42 @@ class EventDetailViewController: UIViewController, UITableViewDelegate, UITableV
     
     func tasksListSetUp(_ event: UniversalEvent?) {
         if let eventForTask = event {
-            tasks = eventForTask.tasks.compactMap { $0 } // Removes nil values safely
+            tasks = eventForTask.tasks.compactMap { task in
+                (task?.isDeleted == false) ? task : nil
+            }
         }
-        
     }
+
+    
+    func deleteTask(_ taskToDelete: HomeTask) async {
+        var tasksList = await loadHomeTasks()
+        if let index = tasksList.firstIndex(where: { $0.date == taskToDelete.date && $0.testName == taskToDelete.testName }),
+           let eventIndex = event?.tasks.firstIndex(where: { $0?.date == taskToDelete.date && $0?.testName == taskToDelete.testName }) {
+            if event?.eventType == .userCreated {
+                var customEvents = loadCustomEventsFromUserDefaults()
+                customEvents[eventIndex].tasks.removeAll(where: { $0?.date == taskToDelete.date && $0?.testName == taskToDelete.testName })
+                await saveCustomEventsToUserDefaults(events: customEvents)
+            } else {
+                var scheduleEvents = await loadScheduleEventsFromUserDefaults()
+                scheduleEvents[eventIndex].tasks.removeAll(where: { $0?.date == taskToDelete.date && $0?.testName == taskToDelete.testName })
+                await saveDownloadedEventsToUserDefaults(events: scheduleEvents)
+            }
+            tasksList[index].isDeleted = true
+            event?.tasks.removeAll(where: { $0?.date == taskToDelete.date && $0?.testName == taskToDelete.testName })
+            await saveUsersTasksToUserDefaults(tasks: tasksList)
+            tasksList = await loadHomeTasks()
+            await loadTheWholeList()
+            
+            DispatchQueue.main.async {
+                self.tasksListSetUp(self.event)
+                self.tableView.reloadData()
+            }
+            print("Task marked as deleted")
+        } else {
+            print("Task not found")
+        }
+    }
+
     
     func extractTime(from dateString: String) -> String? {
         let inputFormatter = DateFormatter()
@@ -74,13 +107,13 @@ class EventDetailViewController: UIViewController, UITableViewDelegate, UITableV
     func getDayNameAndDate(from date: Date) -> (dayName: String, formattedDate: String) {
         let formatter = DateFormatter()
         formatter.timeZone = TimeZone(identifier: "UTC")
-
+        
         formatter.dateFormat = "EEEE"
         let dayName = formatter.string(from: date)
-
+        
         formatter.dateFormat = "d MMMM"
         let formattedDate = formatter.string(from: date)
-
+        
         return (dayName, formattedDate)
     }
     
@@ -90,13 +123,23 @@ class EventDetailViewController: UIViewController, UITableViewDelegate, UITableV
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-                let cell = tableView.dequeueReusableCell(withIdentifier: "taskCell") as! TaskPrewatchViewCell
-                let taskForCell = tasks[indexPath.row]
-                cell.taskName.text = "\(taskForCell.testName)"
-                cell.typeOfPass.text = "\(taskForCell.wayOfPassing)"
-                cell.shortTaskDescr.text = "\(taskForCell.task)"
-                return cell
+        let cell = tableView.dequeueReusableCell(withIdentifier: "taskCell") as! TaskPrewatchViewCell
+        let taskForCell = tasks[indexPath.row]
+        cell.taskName.text = "\(taskForCell.testName)"
+        cell.typeOfPass.text = "\(taskForCell.wayOfPassing)"
+        cell.shortTaskDescr.text = "\(taskForCell.task)"
+        return cell
     }
     
+    func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
+        if editingStyle == .delete {
+            let taskToDelete = tasks[indexPath.row]
+            Task {
+                await deleteTask(taskToDelete)
+            }
+            print("Deleted item at row \(indexPath.row)")
+        }
+        
+    }
     
 }
