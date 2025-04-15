@@ -16,6 +16,7 @@ class EventDetailViewController: UIViewController, UITableViewDelegate, UITableV
     override func viewDidLoad() {
         super.viewDidLoad()
         viewControllerSetup()
+        
         tableView.register(TaskPrewatchViewCell.nib(), forCellReuseIdentifier: "taskCell")
         //tableView.register(TaskPrewatchViewCell.nib(), forCellReuseIdentifier: })
         if event?.eventType == EventType.userCreated {

@@ -83,6 +83,7 @@ class UniversalEvent: Codable {
 
 class HomeTask: Codable {
     var id: Int
+    var priority: Int
     var testName: String
     var subject: String
     var date: Date
@@ -92,9 +93,9 @@ class HomeTask: Codable {
     var isDeleted: Bool
     var additionalNotes: String?
     
-    
-    init(id: Int, testName: String, subject: String, date: Date, task: String, description: String, wayOfPassing: WayOfTaskPass, isDeleted: Bool, additionalNotes: String? = nil) {
+    init(id: Int, priority: Int, testName: String, subject: String, date: Date, task: String, description: String, wayOfPassing: WayOfTaskPass, isDeleted: Bool, additionalNotes: String? = nil) {
         self.id = id
+        self.priority = priority
         self.testName = testName
         self.subject = subject
         self.date = date
@@ -109,6 +110,7 @@ class HomeTask: Codable {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         
         self.id = try container.decode(Int.self, forKey: .id)
+        self.priority = try container.decode(Int.self, forKey: .priority)
         self.testName = try container.decode(String.self, forKey: .testName)
         self.subject = try container.decode(String.self, forKey: .subject)
         self.date = try container.decode(Date.self, forKey: .date)
@@ -120,9 +122,16 @@ class HomeTask: Codable {
     }
     
     enum CodingKeys: String, CodingKey {
-        case id, testName, subject, date, task, description, wayOfPassing, isDeleted, additionalNotes
+        case id, priority, testName, subject, date, task, description, wayOfPassing, isDeleted, additionalNotes
     }
+
+//    static func sortByPriority(_ tasks: [HomeTask?]) -> [HomeTask] {
+//        return tasks.compactMap { $0 } 
+//                    .sorted { $0.priority < $1.priority }
+//    }
+
 }
+
 
 //TODO: add image adding to task
 /*

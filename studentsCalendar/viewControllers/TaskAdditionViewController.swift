@@ -7,7 +7,11 @@
 
 import UIKit
 
-class TaskAdditionViewController: UIViewController, UIPickerViewDelegate, UIPickerViewDataSource {
+class TaskAdditionViewController: UIViewController, UIPickerViewDelegate, UIPickerViewDataSource, UITextFieldDelegate {
+    
+    @IBOutlet weak var taskLabel: UILabel!
+    @IBOutlet weak var shortDescr: UILabel!
+    @IBOutlet weak var howToPass: UILabel!
     
     
     @IBOutlet weak var taskNameTF: UITextField!
@@ -16,22 +20,26 @@ class TaskAdditionViewController: UIViewController, UIPickerViewDelegate, UIPick
     @IBOutlet weak var datePicker: UIDatePicker!
     @IBOutlet weak var subjectPicker: UIPickerView!
     @IBOutlet weak var taskPassWay: UIPickerView!
+    @IBOutlet weak var segmentController: UISegmentedControl!
     
     
-    var subjects: [UniversalEvent] = [] // Example data
-    //let taskPassWays: [String] = ["Online", "No pass", "Offline"]
-    //let taskPassWays: [WayOfTaskPass] = [.offline, .online, .selfStudy]
+    var subjects: [UniversalEvent] = []
     let taskPassWays: [String] = WayOfTaskPass.allCases.map { $0.rawValue }
-    // Example data
     var selectedDate: Date = Date()
+    var isImportantTextFieldActive = false
+
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        hideKeyboardWhenTappedAround()
+        setupKeyboardObservers()
+        viewSetUp(0)
         
         subjectPicker.delegate = self
         subjectPicker.dataSource = self
         taskPassWay.delegate = self
         taskPassWay.dataSource = self
+        taskshortDescrTF.delegate = self
         
         datePicker.addTarget(self, action: #selector(datePickerValueChanged), for: .valueChanged)
         subjects = CalendarHelper().eventsForDate(eventsList: eventsList, date: selectedDate)
@@ -45,10 +53,78 @@ class TaskAdditionViewController: UIViewController, UIPickerViewDelegate, UIPick
             taskPassWay.reloadAllComponents()
         }
     
+    @IBAction func segmentedControlChanged(_ sender: UISegmentedControl) {
+        switch sender.selectedSegmentIndex {
+        case 0:
+            viewSetUp(0)
+        case 1:
+            viewSetUp(1)
+        default:
+            break
+        }
+    }
+    
+    func textFieldDidBeginEditing(_ textField: UITextField) {
+        if textField == taskshortDescrTF {
+            isImportantTextFieldActive = true
+        }
+    }
+
+    func textFieldDidEndEditing(_ textField: UITextField) {
+        if textField == taskshortDescrTF {
+            isImportantTextFieldActive = false
+        }
+    }
+    
+    func viewSetUp(_ state: Int) {
+        switch state {
+        case 0:
+            taskLabel.text = "Task:"
+            shortDescr.text = "Short descr.:"
+            howToPass.text = "How to pass"
+            // Change something here
+        case 1:
+            taskLabel.text = "Theme:"
+            shortDescr.text = "Mater. to prepare:"
+            howToPass.text = "Exam type:"
+            // Change something else
+        default:
+            break
+        }
+    }
+    
+    deinit {
+        NotificationCenter.default.removeObserver(self)
+    }
+    
+    private func setupKeyboardObservers() {
+        NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillShow), name: UIResponder.keyboardWillShowNotification, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillHide), name: UIResponder.keyboardWillHideNotification, object: nil)
+    }
+    
+    @objc private func keyboardWillShow(notification: Notification) {
+        if !isImportantTextFieldActive { return }  // Only move if fifth field is active
+        
+        guard let userInfo = notification.userInfo,
+              let keyboardFrame = userInfo[UIResponder.keyboardFrameEndUserInfoKey] as? CGRect else { return }
+        
+        let keyboardHeight = keyboardFrame.height
+        self.view.frame.origin.y = -keyboardHeight / 4   // Move up a bit (adjust if needed)
+    }
+
+    @objc private func keyboardWillHide(notification: Notification) {
+//        if !isImportantTextFieldActive { return }  // Only reset if fifth field was active
+        
+        self.view.frame.origin.y = 0
+    }
+
+
+    
     // MARK: - Handle Date Picker Change
     @IBAction func saveAction(_ sender: Any) {
         Task { @MainActor in
             var id: Int
+            var priority: Int
             var testName: String
             var subject: String
             var date: Date
@@ -65,6 +141,8 @@ class TaskAdditionViewController: UIViewController, UIPickerViewDelegate, UIPick
                 showAlert(message: "Task name is required.")
                 return
             }
+            
+            priority = segmentController.selectedSegmentIndex
             
             if let taskTest = taskTF.text, !taskTest.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
                 task = taskTest
@@ -108,6 +186,7 @@ class TaskAdditionViewController: UIViewController, UIPickerViewDelegate, UIPick
             
             let newTask = HomeTask(
                 id: id,
+                priority: priority,
                 testName: testName,
                 subject: subject,
                 date: date,
@@ -127,9 +206,9 @@ class TaskAdditionViewController: UIViewController, UIPickerViewDelegate, UIPick
             
             let localEventsList = eventsList
             
-            // Find an event with the same date and name
             if let eventIndex = localEventsList.firstIndex(where: { $0.date == date && $0.name == subject }) {
                 localEventsList[eventIndex].tasks.append(newTask)
+//                localEventsList[eventIndex].tasks = HomeTask.sortByPriority(localEventsList[eventIndex].tasks)
                 print(localEventsList[eventIndex])
                 if localEventsList[eventIndex].eventType == .scheduleDownloaded {
                     var scheduleEventslist: [UniversalEvent] = []
@@ -139,6 +218,7 @@ class TaskAdditionViewController: UIViewController, UIPickerViewDelegate, UIPick
                         }
                         
                     }
+                    
                     await saveDownloadedEventsToUserDefaults(events: scheduleEventslist)
                 } else {
                     var userEventslist: [UniversalEvent] = []
@@ -228,3 +308,16 @@ class TaskAdditionViewController: UIViewController, UIPickerViewDelegate, UIPick
         return formatter.date(from: dateString)
     }
 }
+
+extension UIViewController {
+    func hideKeyboardWhenTappedAround() {
+        let tap = UITapGestureRecognizer(target: self, action: #selector(dismissKeyboard))
+        tap.cancelsTouchesInView = false // so your table rows are still clickable
+        view.addGestureRecognizer(tap)
+    }
+
+    @objc private func dismissKeyboard() {
+        view.endEditing(true)
+    }
+}
+

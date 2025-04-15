@@ -7,11 +7,13 @@
 
 import UIKit
 
-class EventEditViewController: UIViewController
+class EventEditViewController: UIViewController, UITextFieldDelegate
 {
     
     var date: Date?
     weak var delegate: DateForAddParseDelegate!
+    var isImportantTextFieldActive = false
+
     
     @IBOutlet weak var nameTF: UITextField!
     @IBOutlet weak var eventStartdatePicker: UIDatePicker!
@@ -23,7 +25,47 @@ class EventEditViewController: UIViewController
     override func viewDidLoad()
     {
         super.viewDidLoad()
+        hideKeyboardWhenTappedAround()
+        setupKeyboardObservers()
         eventStartdatePicker.date = date ?? selectedDate
+        notatesTF.delegate = self
+    }
+    
+    deinit {
+        NotificationCenter.default.removeObserver(self)
+    }
+    
+    private func setupKeyboardObservers() {
+        NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillShow), name: UIResponder.keyboardWillShowNotification, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillHide), name: UIResponder.keyboardWillHideNotification, object: nil)
+    }
+
+    @objc private func keyboardWillShow(notification: Notification) {
+        if !isImportantTextFieldActive { return }  // Only move if fifth field is active
+        
+        guard let userInfo = notification.userInfo,
+              let keyboardFrame = userInfo[UIResponder.keyboardFrameEndUserInfoKey] as? CGRect else { return }
+        
+        let keyboardHeight = keyboardFrame.height
+        self.view.frame.origin.y = -keyboardHeight / 4   // Move up a bit (adjust if needed)
+    }
+
+    @objc private func keyboardWillHide(notification: Notification) {
+        /*if !isImportantTextFieldActive { return }*/  // Only reset if fifth field was active
+        
+        self.view.frame.origin.y = 0
+    }
+    
+    func textFieldDidBeginEditing(_ textField: UITextField) {
+        if textField == notatesTF {
+            isImportantTextFieldActive = true
+        }
+    }
+
+    func textFieldDidEndEditing(_ textField: UITextField) {
+        if textField == notatesTF {
+            isImportantTextFieldActive = false
+        }
     }
     
     @IBAction func saveAction(_ sender: Any) {
@@ -89,3 +131,4 @@ class EventEditViewController: UIViewController
     }
 
 }
+
