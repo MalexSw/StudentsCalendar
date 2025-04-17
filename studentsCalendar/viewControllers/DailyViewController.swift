@@ -22,11 +22,11 @@ class DailyViewController: UIViewController, UITableViewDelegate, UITableViewDat
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        Task {
-            await loadTheWholeList()
-            await updateEventsList()
-            updateEvents()
-        }
+//        Task {
+//            await loadTheWholeList()
+//            await updateEventsList()
+//            updateEvents()
+//        }
         NotificationCenter.default.addObserver(self, selector: #selector(updateEvents), name: NSNotification.Name("EventsUpdated"), object: nil)
         
     }
@@ -34,11 +34,15 @@ class DailyViewController: UIViewController, UITableViewDelegate, UITableViewDat
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         Task {
-            await MainActor.run {
-                updateEvents()
-            }
+            await uploadAndParseEvents()
+            await loadTheWholeList()
+            await updateEventsList()
+            
+            updateEvents()
         }
-    }
+        NotificationCenter.default.addObserver(self, selector: #selector(updateEvents), name: NSNotification.Name("EventsUpdated"), object: nil)
+        }
+
     
     func updateEventsList() async {
         guard let date = selectedDate else { return }
@@ -121,10 +125,23 @@ class DailyViewController: UIViewController, UITableViewDelegate, UITableViewDat
         } else if event.eventType == EventType.userCreated {
             cell.descriptionLabel.text = event.shortDescription
         }
+        cell.backgroundColor = .systemBackground
+        cell.layer.borderWidth = 0
+        cell.layer.borderColor = UIColor.clear.cgColor
+        cell.layer.cornerRadius = 0
+        cell.clipsToBounds = false
         if event.tasks.isEmpty {
             cell.taskMark.text = ""
         } else {
             cell.taskMark.text = "!"
+            if event.tasks.contains(where: { $0!.priority == 1 }) {
+                cell.backgroundColor = UIColor(red: 210/255.0, green: 148/255.0, blue: 151/255.0, alpha: 0.4)
+                cell.layer.borderColor = UIColor.red.cgColor
+                cell.layer.borderWidth = 2.0
+                cell.layer.cornerRadius = 8
+                cell.clipsToBounds = true
+            }
+
         }
         return cell
     }

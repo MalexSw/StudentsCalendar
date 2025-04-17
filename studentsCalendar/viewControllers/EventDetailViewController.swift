@@ -66,20 +66,31 @@ class EventDetailViewController: UIViewController, UITableViewDelegate, UITableV
     
     func deleteTask(_ taskToDelete: HomeTask) async {
         var tasksList = await loadHomeTasks()
-        if let index = tasksList.firstIndex(where: { $0.date == taskToDelete.date && $0.testName == taskToDelete.testName }),
-           let eventIndex = event?.tasks.firstIndex(where: { $0?.date == taskToDelete.date && $0?.testName == taskToDelete.testName }) {
+        if let index = tasksList.firstIndex(where: { $0.date == taskToDelete.date && $0.testName == taskToDelete.testName && $0.id == taskToDelete.id }),
+           let eventIndex = event?.tasks.firstIndex(where: { $0?.date == taskToDelete.date && $0?.testName == taskToDelete.testName && $0?.id == taskToDelete.id }) {
+            
             if event?.eventType == .userCreated {
-                var customEvents = loadCustomEventsFromUserDefaults()
-                customEvents[eventIndex].tasks.removeAll(where: { $0?.date == taskToDelete.date && $0?.testName == taskToDelete.testName })
+                var customEvents = await loadCustomEventsFromUserDefaults()
+                var tasks = customEvents[eventIndex].tasks
+                if let taskIdx = tasks.firstIndex(where: { $0?.date == taskToDelete.date && $0?.testName == taskToDelete.testName && $0?.id == taskToDelete.id }) {
+                    tasks[taskIdx]?.isDeleted = true
+                    customEvents[eventIndex].tasks = tasks
+                }
                 await saveCustomEventsToUserDefaults(events: customEvents)
             } else {
                 var scheduleEvents = await loadScheduleEventsFromUserDefaults()
-                scheduleEvents[eventIndex].tasks.removeAll(where: { $0?.date == taskToDelete.date && $0?.testName == taskToDelete.testName })
+                var tasks = scheduleEvents[eventIndex].tasks
+                if let taskIdx = tasks.firstIndex(where: { $0?.date == taskToDelete.date && $0?.testName == taskToDelete.testName && $0?.id == taskToDelete.id }) {
+                    tasks[taskIdx]?.isDeleted = true
+                    scheduleEvents[eventIndex].tasks = tasks
+                }
                 await saveDownloadedEventsToUserDefaults(events: scheduleEvents)
             }
+            
             tasksList[index].isDeleted = true
-            event?.tasks.removeAll(where: { $0?.date == taskToDelete.date && $0?.testName == taskToDelete.testName })
+            event?.tasks[eventIndex]?.isDeleted = true
             await saveUsersTasksToUserDefaults(tasks: tasksList)
+            
             tasksList = await loadHomeTasks()
             await loadTheWholeList()
             
@@ -87,11 +98,13 @@ class EventDetailViewController: UIViewController, UITableViewDelegate, UITableV
                 self.tasksListSetUp(self.event)
                 self.tableView.reloadData()
             }
+            
             print("Task marked as deleted")
         } else {
             print("Task not found")
         }
     }
+
 
     
     func extractTime(from dateString: String) -> String? {
@@ -129,6 +142,13 @@ class EventDetailViewController: UIViewController, UITableViewDelegate, UITableV
         cell.taskName.text = "\(taskForCell.testName)"
         cell.typeOfPass.text = "\(taskForCell.wayOfPassing)"
         cell.shortTaskDescr.text = "\(taskForCell.task)"
+        
+        if taskForCell.priority == 1 {
+            cell.layer.borderColor = UIColor.red.cgColor
+            cell.layer.borderWidth = 5.0
+            cell.layer.cornerRadius = 10
+            cell.clipsToBounds = true
+        }
         return cell
     }
     

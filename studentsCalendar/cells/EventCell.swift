@@ -12,4 +12,13 @@ class EventCell: UITableViewCell
     @IBOutlet weak var eventLabel: UILabel!
     @IBOutlet weak var descriptionLabel: UILabel!
     @IBOutlet weak var taskMark: UILabel!
+    
+    override func prepareForReuse() {
+        super.prepareForReuse()
+        backgroundColor = .clear
+        layer.borderWidth = 0
+        layer.borderColor = UIColor.clear.cgColor
+        layer.cornerRadius = 0
+        clipsToBounds = false
+    }
 }

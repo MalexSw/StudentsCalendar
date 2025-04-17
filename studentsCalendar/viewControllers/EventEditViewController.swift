@@ -105,7 +105,7 @@ class EventEditViewController: UIViewController, UITextFieldDelegate
             
             let newEvent = UniversalEvent(id: id, name: summary, date: date!, eventType: eventType, summary: summary, start: start, end: end, location: location, shortDescription: shortDescr, notates: notates, isEventOblig: isEventOblig)
             
-            var savedEvents = loadCustomEventsFromUserDefaults()
+            var savedEvents = await loadCustomEventsFromUserDefaults()
             savedEvents.append(newEvent)
             savedEvents.sort { $0.date < $1.date }
             

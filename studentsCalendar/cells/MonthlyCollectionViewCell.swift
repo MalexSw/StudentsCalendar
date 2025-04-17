@@ -12,6 +12,15 @@ class MonthlyCollectionViewCell: UICollectionViewCell {
         setupEventView()
     }
     
+    override func prepareForReuse() {
+        super.prepareForReuse()
+        backgroundColor = .clear
+        layer.borderWidth = 0
+        layer.borderColor = UIColor.clear.cgColor
+        layer.cornerRadius = 0
+        clipsToBounds = false
+    }
+    
     func configure(day: String, hasEvent: Bool) {
         dayOfMonth.text = day
         eventView.isHidden = !hasEvent

@@ -108,7 +108,7 @@ class WeeklyViewController: UIViewController, UICollectionViewDelegate, UICollec
     }
     
     func deleteEvent(_ event: UniversalEvent) async {
-        var customEventsSaved = loadCustomEventsFromUserDefaults()
+        var customEventsSaved = await loadCustomEventsFromUserDefaults()
         if customEventsSaved.contains(where: { $0.id == event.id }) {
             customEventsSaved.removeAll { $0.id == event.id}
             await saveCustomEventsToUserDefaults(events: customEventsSaved)
@@ -142,6 +142,13 @@ class WeeklyViewController: UIViewController, UICollectionViewDelegate, UICollec
             cell.taskMark.text = ""
         } else {
             cell.taskMark.text = "!"
+            if event.tasks.contains(where: { $0!.priority == 1 }) {
+                cell.backgroundColor = UIColor(red: 210/255.0, green: 148/255.0, blue: 151/255.0, alpha: 0.4)
+                cell.layer.borderColor = UIColor.red.cgColor
+                cell.layer.borderWidth = 2.0
+                cell.layer.cornerRadius = 8
+                cell.clipsToBounds = true
+            }
         }
         
         return cell
