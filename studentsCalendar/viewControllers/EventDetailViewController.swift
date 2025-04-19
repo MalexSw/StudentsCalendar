@@ -70,7 +70,7 @@ class EventDetailViewController: UIViewController, UITableViewDelegate, UITableV
            let eventIndex = event?.tasks.firstIndex(where: { $0?.date == taskToDelete.date && $0?.testName == taskToDelete.testName && $0?.id == taskToDelete.id }) {
             
             if event?.eventType == .userCreated {
-                var customEvents = await loadCustomEventsFromUserDefaults()
+                let customEvents = await loadCustomEventsFromUserDefaults()
                 var tasks = customEvents[eventIndex].tasks
                 if let taskIdx = tasks.firstIndex(where: { $0?.date == taskToDelete.date && $0?.testName == taskToDelete.testName && $0?.id == taskToDelete.id }) {
                     tasks[taskIdx]?.isDeleted = true
@@ -78,7 +78,7 @@ class EventDetailViewController: UIViewController, UITableViewDelegate, UITableV
                 }
                 await saveCustomEventsToUserDefaults(events: customEvents)
             } else {
-                var scheduleEvents = await loadScheduleEventsFromUserDefaults()
+                let scheduleEvents = await loadScheduleEventsFromUserDefaults()
                 var tasks = scheduleEvents[eventIndex].tasks
                 if let taskIdx = tasks.firstIndex(where: { $0?.date == taskToDelete.date && $0?.testName == taskToDelete.testName && $0?.id == taskToDelete.id }) {
                     tasks[taskIdx]?.isDeleted = true

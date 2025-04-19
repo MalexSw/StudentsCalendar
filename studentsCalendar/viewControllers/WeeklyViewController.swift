@@ -18,15 +18,22 @@ class WeeklyViewController: UIViewController, UICollectionViewDelegate, UICollec
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        Task {
-            await loadTheWholeList()
-            await setCellsView()
-            await setWeekView()
-//            await uploadAndParseEvents()
-        }
         
         NotificationCenter.default.addObserver(self, selector: #selector(updateEvents), name: NSNotification.Name("EventsUpdated"), object: nil)
     }
+    
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        Task {
+            await uploadAndParseEvents()
+            await loadTheWholeList()
+            await setCellsView()
+            await setWeekView()
+            
+            
+        }
+        NotificationCenter.default.addObserver(self, selector: #selector(updateEvents), name: NSNotification.Name("EventsUpdated"), object: nil)
+        }
     
     @objc func updateEvents() {
         Task {

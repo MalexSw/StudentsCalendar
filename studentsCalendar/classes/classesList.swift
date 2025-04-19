@@ -81,7 +81,7 @@ class UniversalEvent: Codable {
     }
 }
 
-class HomeTask: Codable {
+struct HomeTask: Codable, Hashable {
     var id: Int
     var priority: Int
     var testName: String
@@ -106,24 +106,24 @@ class HomeTask: Codable {
         self.additionalNotes = additionalNotes
     }
     
-    required init(from decoder: Decoder) throws {
-        let container = try decoder.container(keyedBy: CodingKeys.self)
-        
-        self.id = try container.decode(Int.self, forKey: .id)
-        self.priority = try container.decode(Int.self, forKey: .priority)
-        self.testName = try container.decode(String.self, forKey: .testName)
-        self.subject = try container.decode(String.self, forKey: .subject)
-        self.date = try container.decode(Date.self, forKey: .date)
-        self.task = try container.decode(String.self, forKey: .task)
-        self.description = try container.decode(String.self, forKey: .description)
-        self.wayOfPassing = try container.decode(WayOfTaskPass.self, forKey: .wayOfPassing)
-        self.isDeleted = try container.decode(Bool.self, forKey: .isDeleted)
-        self.additionalNotes = try container.decodeIfPresent(String.self, forKey: .additionalNotes)
-    }
+//    required init(from decoder: Decoder) throws {
+//        let container = try decoder.container(keyedBy: CodingKeys.self)
+//        
+//        self.id = try container.decode(Int.self, forKey: .id)
+//        self.priority = try container.decode(Int.self, forKey: .priority)
+//        self.testName = try container.decode(String.self, forKey: .testName)
+//        self.subject = try container.decode(String.self, forKey: .subject)
+//        self.date = try container.decode(Date.self, forKey: .date)
+//        self.task = try container.decode(String.self, forKey: .task)
+//        self.description = try container.decode(String.self, forKey: .description)
+//        self.wayOfPassing = try container.decode(WayOfTaskPass.self, forKey: .wayOfPassing)
+//        self.isDeleted = try container.decode(Bool.self, forKey: .isDeleted)
+//        self.additionalNotes = try container.decodeIfPresent(String.self, forKey: .additionalNotes)
+//    }
     
-    enum CodingKeys: String, CodingKey {
-        case id, priority, testName, subject, date, task, description, wayOfPassing, isDeleted, additionalNotes
-    }
+//    enum CodingKeys: String, CodingKey {
+//        case id, priority, testName, subject, date, task, description, wayOfPassing, isDeleted, additionalNotes
+//    }
 
 //    static func sortByPriority(_ tasks: [HomeTask?]) -> [HomeTask] {
 //        return tasks.compactMap { $0 } 

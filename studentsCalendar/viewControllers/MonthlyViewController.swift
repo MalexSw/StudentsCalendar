@@ -154,27 +154,16 @@ class MonthlyViewController: UIViewController, UICollectionViewDelegate, UIColle
         totalSquares.count
     }
     
-//    func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-//        let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "MonthlyCollectionViewCell", for: indexPath) as! MonthlyCollectionViewCell
-//        cell.configure(day: totalSquares[indexPath.item], hasEvent: checkIfEventExists(for: totalSquares[indexPath.item]))
-////        cell.layer.borderColor = UIColor.blue.cgColor
-////        cell.layer.cornerRadius = 8.0
-////        cell.layer.borderWidth = 1.5
-//        return cell
-//    }
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "MonthlyCollectionViewCell", for: indexPath) as! MonthlyCollectionViewCell
         let day = totalSquares[indexPath.item]  // Get the specific day
         
-        // Check if an event exists for this day and if it has an exam
         let hasEvent = checkIfEventExists(for: totalSquares[indexPath.item])
         let hasExam = checkIfExamExists(for: totalSquares[indexPath.item])
         
-        // Configure the cell based on whether there is an event and/or an exam
         cell.configure(day: day, hasEvent: hasEvent)
         if hasExam {
-            // Add a border or any visual cue to indicate there's an exam
             cell.backgroundColor = UIColor(red: 210/255.0, green: 148/255.0, blue: 151/255.0, alpha: 0.4)
             cell.layer.borderColor = UIColor.red.cgColor
             cell.layer.borderWidth = 2.0
@@ -186,27 +175,14 @@ class MonthlyViewController: UIViewController, UICollectionViewDelegate, UIColle
     }
     
     func checkIfExamExists(for day: String) -> Bool {
-        // Ensure the day string is a valid number
         guard let dayInt = Int(day) else { return false }
-
-        // Extract the current selected month and year
         var dateComponents = Calendar.current.dateComponents([.year, .month], from: selectedDate)
         dateComponents.day = dayInt
-
-        // Create a proper Date object
         guard let fullDate = Calendar.current.date(from: dateComponents) else { return false }
-
-        // Get all events for the specific date
         let eventsForDay = CalendarHelper().eventsForDate(eventsList: eventsList, date: fullDate)
-
-        // Check each event's task array to see if any task qualifies as an "exam"
         for event in eventsForDay {
             for task in event.tasks {
                 if let task = task {
-//                    let testName = task.testName.lowercased()
-//                    let taskDescription = task.task.lowercased()
-//                    // You can adjust the logic below to suit your app's exam identification rules
-//                    if testName.contains("exam") || taskDescription.contains("exam") || task.wayOfPassing == .exam {
                     if task.priority == 1 {
                         return true
                     }

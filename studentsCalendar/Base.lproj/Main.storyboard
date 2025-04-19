@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="23504" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="0sL-96-pIu">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="23504" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="BPN-oC-70t">
     <device id="retina6_12" orientation="portrait" appearance="light"/>
     <dependencies>
         <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="23506"/>
@@ -9,10 +9,29 @@
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <scenes>
-        <!--Navigation Controller-->
+        <!--Tab Bar Controller-->
+        <scene sceneID="PIo-mN-eGw">
+            <objects>
+                <tabBarController id="BPN-oC-70t" sceneMemberID="viewController">
+                    <tabBar key="tabBar" contentMode="scaleToFill" insetsLayoutMarginsFromSafeArea="NO" id="rMe-Is-xWl">
+                        <rect key="frame" x="0.0" y="0.0" width="393" height="49"/>
+                        <autoresizingMask key="autoresizingMask"/>
+                        <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                    </tabBar>
+                    <connections>
+                        <segue destination="0sL-96-pIu" kind="relationship" relationship="viewControllers" id="2RR-Im-aH2"/>
+                        <segue destination="l1I-ak-PVy" kind="relationship" relationship="viewControllers" id="Jqa-F5-4Kf"/>
+                    </connections>
+                </tabBarController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="QTF-zg-Inp" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="-1811" y="4"/>
+        </scene>
+        <!--Calendar-->
         <scene sceneID="a1a-IE-jCA">
             <objects>
                 <navigationController id="0sL-96-pIu" sceneMemberID="viewController">
+                    <tabBarItem key="tabBarItem" title="Calendar" image="list.clipboard" catalog="system" id="TBC-WG-s4C"/>
                     <navigationBar key="navigationBar" contentMode="scaleToFill" id="ByQ-wY-9uc">
                         <rect key="frame" x="0.0" y="59" width="393" height="44"/>
                         <autoresizingMask key="autoresizingMask"/>
@@ -112,7 +131,7 @@
                                 </constraints>
                             </stackView>
                             <collectionView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" dataMode="prototypes" translatesAutoresizingMaskIntoConstraints="NO" id="0lv-oS-SIg">
-                                <rect key="frame" x="0.0" y="226.66666666666669" width="393" height="591.33333333333326"/>
+                                <rect key="frame" x="0.0" y="226.66666666666669" width="393" height="542.33333333333326"/>
                                 <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                                 <collectionViewFlowLayout key="collectionViewLayout" minimumLineSpacing="3" minimumInteritemSpacing="3" id="YLi-AP-1ud">
                                     <size key="itemSize" width="128" height="146"/>
@@ -257,7 +276,7 @@
                                 <nil key="highlightedColor"/>
                             </label>
                             <tableView clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="default" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="-1" estimatedSectionHeaderHeight="-1" sectionFooterHeight="-1" estimatedSectionFooterHeight="-1" translatesAutoresizingMaskIntoConstraints="NO" id="SQc-Kn-8xb">
-                                <rect key="frame" x="0.0" y="235.66666666666669" width="393" height="582.33333333333326"/>
+                                <rect key="frame" x="0.0" y="235.66666666666669" width="393" height="533.33333333333326"/>
                                 <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                                 <prototypes>
                                     <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" preservesSuperviewLayoutMargins="YES" selectionStyle="default" indentationWidth="10" reuseIdentifier="dayCell" rowHeight="80" id="oHT-r6-Dov" customClass="DailyTableViewCell" customModule="studentsCalendar" customModuleProvider="target">
@@ -488,7 +507,7 @@
                                 </connections>
                             </collectionView>
                             <tableView clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="default" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="-1" estimatedSectionHeaderHeight="-1" sectionFooterHeight="-1" estimatedSectionFooterHeight="-1" translatesAutoresizingMaskIntoConstraints="NO" id="Itx-mc-nsI">
-                                <rect key="frame" x="0.0" y="322.66666666666674" width="393" height="495.33333333333326"/>
+                                <rect key="frame" x="0.0" y="322.66666666666674" width="393" height="446.33333333333326"/>
                                 <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                                 <prototypes>
                                     <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" preservesSuperviewLayoutMargins="YES" selectionStyle="default" indentationWidth="10" reuseIdentifier="cellID" rowHeight="80" id="Fc8-wt-fZQ" customClass="EventCell" customModule="studentsCalendar" customModuleProvider="target">
@@ -832,6 +851,52 @@
             </objects>
             <point key="canvasLocation" x="2012.9770992366412" y="-657.04225352112678"/>
         </scene>
+        <!--Tasks lisst-->
+        <scene sceneID="RQd-xW-g5O">
+            <objects>
+                <navigationController id="l1I-ak-PVy" sceneMemberID="viewController">
+                    <tabBarItem key="tabBarItem" title="Tasks lisst" image="book.pages" catalog="system" id="qwk-zv-A0A"/>
+                    <navigationBar key="navigationBar" contentMode="scaleToFill" id="fIk-fQ-J7g">
+                        <rect key="frame" x="0.0" y="59" width="393" height="44"/>
+                        <autoresizingMask key="autoresizingMask"/>
+                    </navigationBar>
+                    <connections>
+                        <segue destination="pEQ-Wx-LFJ" kind="relationship" relationship="rootViewController" id="nvN-eB-ima"/>
+                    </connections>
+                </navigationController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="5X5-58-l21" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="-848" y="765"/>
+        </scene>
+        <!--Tasks list-->
+        <scene sceneID="xdJ-2P-Cq3">
+            <objects>
+                <tableViewController id="pEQ-Wx-LFJ" customClass="TaskWatchTableViewController" customModule="studentsCalendar" customModuleProvider="target" sceneMemberID="viewController">
+                    <tableView key="view" clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="default" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="-1" estimatedSectionHeaderHeight="-1" sectionFooterHeight="-1" estimatedSectionFooterHeight="-1" id="eCe-RD-EZ5">
+                        <rect key="frame" x="0.0" y="0.0" width="393" height="852"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                        <prototypes>
+                            <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" preservesSuperviewLayoutMargins="YES" selectionStyle="default" indentationWidth="10" reuseIdentifier="taskListCell" id="m6r-EC-Z0A" customClass="TaskWatchControllerTableViewCell" customModule="studentsCalendar" customModuleProvider="target">
+                                <rect key="frame" x="0.0" y="50" width="393" height="43.666667938232422"/>
+                                <autoresizingMask key="autoresizingMask"/>
+                                <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" preservesSuperviewLayoutMargins="YES" insetsLayoutMarginsFromSafeArea="NO" tableViewCell="m6r-EC-Z0A" id="ZSW-Hs-Npx">
+                                    <rect key="frame" x="0.0" y="0.0" width="393" height="43.666667938232422"/>
+                                    <autoresizingMask key="autoresizingMask"/>
+                                </tableViewCellContentView>
+                            </tableViewCell>
+                        </prototypes>
+                        <connections>
+                            <outlet property="dataSource" destination="pEQ-Wx-LFJ" id="O1F-ee-qzM"/>
+                            <outlet property="delegate" destination="pEQ-Wx-LFJ" id="wyO-f2-25V"/>
+                        </connections>
+                    </tableView>
+                    <navigationItem key="navigationItem" title="Tasks list" id="waA-Dp-F7E"/>
+                </tableViewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="upl-Vj-zzu" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="88" y="765"/>
+        </scene>
         <!--Task addition-->
         <scene sceneID="mHG-Oo-7Ws">
             <objects>
@@ -983,16 +1048,18 @@
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="5Rq-Oy-gp8" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="87.786259541984734" y="777.46478873239437"/>
+            <point key="canvasLocation" x="88" y="-671"/>
         </scene>
     </scenes>
     <inferredMetricsTieBreakers>
-        <segue reference="AbV-Kj-BCB"/>
-        <segue reference="pXJ-Dm-Ure"/>
+        <segue reference="yGs-4H-l2w"/>
+        <segue reference="7pn-el-8zJ"/>
     </inferredMetricsTieBreakers>
     <resources>
         <image name="arrowshape.backward.circle.fill" catalog="system" width="128" height="123"/>
         <image name="arrowshape.right.circle.fill" catalog="system" width="128" height="123"/>
+        <image name="book.pages" catalog="system" width="107" height="128"/>
+        <image name="list.clipboard" catalog="system" width="98" height="128"/>
         <systemColor name="systemBackgroundColor">
             <color white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
         </systemColor>
