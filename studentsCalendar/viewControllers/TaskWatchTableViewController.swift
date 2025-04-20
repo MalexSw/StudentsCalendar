@@ -14,6 +14,7 @@ class TaskWatchTableViewController: UITableViewController {
     private lazy var multiSelectMenu: UIMenu = createMultiSelectMenu()
     
     var active: Bool = false
+    var deleted: Bool = false
     var tasks: Bool = false
     var exams: Bool = false
     
@@ -35,7 +36,7 @@ class TaskWatchTableViewController: UITableViewController {
     }
     
     private func createMultiSelectMenu() -> UIMenu {
-        let options = ["Active", "Tasks", "Exams"]
+        let options = ["Active", "Deleted", "Tasks", "Exams"]
         
         let actions = options.map { optionName in
             UIAction(
@@ -53,6 +54,8 @@ class TaskWatchTableViewController: UITableViewController {
         switch option {
         case "Active":
             active.toggle()
+        case "Deleted":
+            deleted.toggle()
         case "Tasks":
             tasks.toggle()
         case "Exams":
@@ -71,16 +74,19 @@ class TaskWatchTableViewController: UITableViewController {
         navigationItem.rightBarButtonItem?.menu = createMultiSelectMenu()
         
         // Update tasksToShow
-        tasksToShowSetUp(active, tasks, exams)
+        tasksToShowSetUp(active, deleted, tasks, exams)
         
         print("Selected Options: \(selectedOptions)")
     }
     
-    func tasksToShowSetUp(_ active: Bool, _ tasks: Bool, _ exams: Bool) {
+    func tasksToShowSetUp(_ active: Bool, _ deleted: Bool, _ tasks: Bool, _ exams: Bool) {
         tasksToShow = []
         
         if active {
             tasksToShow += tasksList.filter { !$0.isDeleted }
+        }
+        if deleted {
+            tasksToShow += tasksList.filter { $0.isDeleted }
         }
         if tasks {
             tasksToShow += tasksList.filter { $0.priority == 0 }
