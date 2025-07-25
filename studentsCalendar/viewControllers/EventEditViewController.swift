@@ -28,6 +28,7 @@ class EventEditViewController: UIViewController, UITextFieldDelegate
         hideKeyboardWhenTappedAround()
         setupKeyboardObservers()
         eventStartdatePicker.date = date ?? selectedDate
+        eventEnddatePicker.date = date ?? selectedDate
         notatesTF.delegate = self
     }
     
@@ -98,21 +99,64 @@ class EventEditViewController: UIViewController, UITextFieldDelegate
                 return
             }
             
-            let id = eventsList.count
-            date = eventStartdatePicker.date
-            start = dateToString(eventStartdatePicker.date)
-            end = dateToString(eventEnddatePicker.date)
-            
-            let newEvent = UniversalEvent(id: id, name: summary, date: date!, eventType: eventType, summary: summary, start: start, end: end, location: location, shortDescription: shortDescr, notates: notates, isEventOblig: isEventOblig)
-            
+//            let id = eventsList.count
+//            date = eventStartdatePicker.date
+//            start = dateToString(eventStartdatePicker.date)
+//            end = dateToString(eventEnddatePicker.date)
+//            
+//            let newEvent = UniversalEvent(id: id, name: summary, date: date!, eventType: eventType, summary: summary, start: start, end: end, location: location, shortDescription: shortDescr, notates: notates, isEventOblig: isEventOblig)
+//            
+//            var savedEvents = await loadCustomEventsFromUserDefaults()
+//            savedEvents.append(newEvent)
+//            savedEvents.sort { $0.date < $1.date }
+//            
+//            await saveCustomEventsToUserDefaults(events: savedEvents)
+//            await loadTheWholeList()
+//            
+//            navigationController?.popViewController(animated: true)
+            let calendar = Calendar.current
+            let startDate = eventStartdatePicker.date
+            let endDate = eventEnddatePicker.date
+
+            guard startDate <= endDate else {
+                showAlert(message: "End date must be after start date.")
+                return
+            }
+
+//            var currentDate = calendar.startOfDay(for: startDate)
+//            let endDateDay = calendar.startOfDay(for: endDate)
+            var currentDate = startDate
+            let endDateDay = endDate
+
+
             var savedEvents = await loadCustomEventsFromUserDefaults()
-            savedEvents.append(newEvent)
+            let origin = currentDate;
+            while currentDate <= endDateDay {
+                let newEvent = UniversalEvent(
+                    id: savedEvents.count,
+                    name: summary,
+                    date: dateCheck(origin: origin, current: currentDate),
+                    eventType: eventType,
+                    summary: summary,
+                    start: startTimeCheck(origin: origin, current: currentDate),
+                    end: endTimeCheck(start: currentDate, end: endDateDay),
+                    location: location,
+                    shortDescription: shortDescr,
+                    notates: notates,
+                    isEventOblig: isEventOblig
+                )
+                
+                savedEvents.append(newEvent)
+                
+                guard let nextDate = calendar.date(byAdding: .day, value: 1, to: currentDate) else { break }
+                currentDate = nextDate
+            }
+
             savedEvents.sort { $0.date < $1.date }
-            
             await saveCustomEventsToUserDefaults(events: savedEvents)
             await loadTheWholeList()
-            
             navigationController?.popViewController(animated: true)
+
         }
     }
 
@@ -128,6 +172,45 @@ class EventEditViewController: UIViewController, UITextFieldDelegate
         dateFormatter.dateFormat = "HH:mm"
         let eventTime = dateFormatter.string(from: date)
         return eventTime
+    }
+    
+    func startTimeCheck(origin: Date, current: Date) -> String {
+        let calendar = Calendar.current
+        let originDate = calendar.component(.day, from: origin)
+        let currentDate = calendar.component(.day, from: current)
+        if originDate != currentDate {
+            return "00:00"
+        } else {
+            return dateToString(origin);
+        }
+    }
+    
+    func endTimeCheck(start: Date, end: Date) -> String {
+        let calendar = Calendar.current
+        let beginDate = calendar.component(.day, from: start)
+        let endDate = calendar.component(.day, from: end)
+        if beginDate != endDate {
+            return "23:59"
+        } else {
+            return dateToString(end);
+        }
+    }
+    
+    func dateCheck(origin: Date, current: Date) -> Date {
+        let calendar = Calendar.current
+        let originalDate = current
+
+        var components = calendar.dateComponents([.year, .month, .day, .hour, .minute], from: originalDate)
+        if current == origin {
+            components.hour = components.hour! + 2
+            let newDate = calendar.date(from: components)
+            return newDate!
+        } else {
+            components.hour = 02
+            components.minute = 0
+            let newDate = calendar.date(from: components)
+            return newDate!
+        }
     }
 
 }

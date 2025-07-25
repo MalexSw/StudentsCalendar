@@ -30,6 +30,7 @@ class MonthlyViewController: UIViewController, UICollectionViewDelegate, UIColle
         super.viewDidLoad()
         collectionView.register(MonthlyCollectionViewCell.nib(), forCellWithReuseIdentifier: "MonthlyCollectionViewCell")
         checkAndRequestScheduleURL()
+        
 //        Task {
 //            await uploadAndParseEvents()
 //            await loadTheWholeList()
