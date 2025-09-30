@@ -121,7 +121,7 @@ func parseICSEvents(icsData: String) -> [UniversalEvent] {
             }
 
             let event = UniversalEvent(
-                id: events.count + 1,
+                id: Int(idCreation(subject: summary, start: eventDate)),
                 name: summary,
                 date: eventDate,
                 eventType: eventType,
@@ -165,6 +165,32 @@ func decodeICSTime(_ icsTime: String) -> String {
     outputFormatter.timeZone = TimeZone.current // Convert to the current local timezone
 
     return outputFormatter.string(from: date)
+}
+
+func idCreation(subject: String, start: Date) -> UInt64 {
+    let subjectID = UInt64(subjectHash(subject))               // 16 bits
+    let minutes = UInt64(start.timeIntervalSince1970 / 60)    // epoch minutes
+    
+    let eventID = (subjectID << 48) | (minutes << 8)
+    return eventID
+}
+
+func subjectHash(_ subject: String) -> UInt16 {
+    var hash: UInt32 = 0x811C9DC5 // 32-bit FNV offset basis
+    for byte in subject.utf8 {
+        hash ^= UInt32(byte)
+        hash = hash &* 16777619 // 32-bit FNV prime
+    }
+    return UInt16(truncatingIfNeeded: hash) // fold to 16-bit
+}
+
+func subjectID(from eventID: UInt64) -> UInt16 {
+    return UInt16((eventID >> 48) & 0xFFFF)
+}
+
+/// Extract group/lecturer index from EventID
+func groupID(from eventID: UInt64) -> UInt8 {
+    return UInt8(eventID & 0xFF)
 }
 
 

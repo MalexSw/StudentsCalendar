@@ -130,7 +130,7 @@ class DailyViewController: UIViewController, UITableViewDelegate, UITableViewDat
         cell.layer.borderColor = UIColor.clear.cgColor
         cell.layer.cornerRadius = 0
         cell.clipsToBounds = false
-        if event.tasks.isEmpty {
+        if checkIfDeleted(subject: event) {
             cell.taskMark.text = ""
         } else {
             cell.taskMark.text = "!"
@@ -166,11 +166,15 @@ class DailyViewController: UIViewController, UITableViewDelegate, UITableViewDat
             print("Deleted item at row \(indexPath.row)")
         }
     }
-
-
-
-
     
+    func checkIfDeleted(subject: UniversalEvent) -> Bool {
+        for task in subject.tasks {
+            if task?.isDeleted == false {
+                return false
+            }
+        }
+        return true
+    }
     // MARK: - Prepare for Segue
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         if segue.identifier == showEventDetail,

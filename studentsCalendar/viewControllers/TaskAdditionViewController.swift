@@ -185,7 +185,7 @@ class TaskAdditionViewController: UIViewController, UIPickerViewDelegate, UIPick
             id = await loadHomeTasks().count
             
             let newTask = HomeTask(
-                id: id,
+                id: Int(idCreation(parentID: UInt64(subjects[selectedSubjectIndex].id), taskName: testName)),
                 priority: priority,
                 testName: testName,
                 subject: subject,
@@ -206,7 +206,33 @@ class TaskAdditionViewController: UIViewController, UIPickerViewDelegate, UIPick
             
             let localEventsList = eventsList
             
-            if let eventIndex = localEventsList.firstIndex(where: { $0.date == date && $0.name == subject }) {
+//            if let eventIndex = localEventsList.firstIndex(where: { $0.date == date && $0.name == subject }) {
+//                localEventsList[eventIndex].tasks.append(newTask)
+////                localEventsList[eventIndex].tasks = HomeTask.sortByPriority(localEventsList[eventIndex].tasks)
+//                print(localEventsList[eventIndex])
+//                if localEventsList[eventIndex].eventType == .scheduleDownloaded {
+//                    var scheduleEventslist: [UniversalEvent] = []
+//                    for events in localEventsList {
+//                        if events.eventType == .scheduleDownloaded {
+//                            scheduleEventslist.append(events)
+//                        }
+//                        
+//                    }
+//                    
+//                    await saveDownloadedEventsToUserDefaults(events: scheduleEventslist)
+//                } else {
+//                    var userEventslist: [UniversalEvent] = []
+//                    for events in localEventsList {
+//                        if events.eventType == .userCreated {
+//                            userEventslist.append(events)
+//                        }
+//                        
+//                    }
+//                    await saveCustomEventsToUserDefaults(events: userEventslist)
+//                }
+//            }
+            
+            if let eventIndex = localEventsList.firstIndex(where: { $0.id == parentID(from: UInt64(id))}) {
                 localEventsList[eventIndex].tasks.append(newTask)
 //                localEventsList[eventIndex].tasks = HomeTask.sortByPriority(localEventsList[eventIndex].tasks)
                 print(localEventsList[eventIndex])
@@ -235,6 +261,25 @@ class TaskAdditionViewController: UIViewController, UIPickerViewDelegate, UIPick
             await loadTheWholeList()
             navigationController?.popViewController(animated: true)
         }
+    }
+    
+    func idCreation(parentID: UInt64, taskName: String) -> UInt64 {
+        let taskId = UInt64(subjectHash(taskName))               // 16 bits
+        return (parentID << 16) | taskId
+        
+    }
+
+    func subjectHash(_ subject: String) -> UInt16 {
+        var hash: UInt32 = 0x811C9DC5 // 32-bit FNV offset basis
+        for byte in subject.utf8 {
+            hash ^= UInt32(byte)
+            hash = hash &* 16777619 // 32-bit FNV prime
+        }
+        return UInt16(truncatingIfNeeded: hash) // fold to 16-bit
+    }
+    
+    func parentID(from childID: UInt64) -> UInt64 {
+        return childID >> 16
     }
     
     // MARK: - UIPickerView Data Source & Delegate

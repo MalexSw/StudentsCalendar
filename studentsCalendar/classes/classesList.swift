@@ -105,7 +105,7 @@ struct HomeTask: Codable, Hashable {
         self.isDeleted = isDeleted
         self.additionalNotes = additionalNotes
     }
-    
+}
 //    required init(from decoder: Decoder) throws {
 //        let container = try decoder.container(keyedBy: CodingKeys.self)
 //        
@@ -130,7 +130,7 @@ struct HomeTask: Codable, Hashable {
 //                    .sorted { $0.priority < $1.priority }
 //    }
 
-}
+
 
 
 //TODO: add image adding to task
