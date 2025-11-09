@@ -54,14 +54,24 @@ func associateTasksWithEvents(_ events: [UniversalEvent]) async -> [UniversalEve
     let tasksList = await loadHomeTasks()
     
     for task in tasksList {
-        if let eventIndex = updatedEvents.firstIndex(where: { $0.date == task.date && $0.name == task.subject }) {
-            if updatedEvents[eventIndex].tasks == nil {
-                updatedEvents[eventIndex].tasks = []
+//        if let eventIndex = updatedEvents.firstIndex(where: { $0.id == Int(parentID(from: UInt64(task.id)))}) {
+//            if updatedEvents[eventIndex].tasks == nil {
+//                updatedEvents[eventIndex].tasks = []
+//            }
+//            if task.isDeleted != true {
+//                updatedEvents[eventIndex].tasks.append(task)
+//            }
+//        }
+            let parent = task.parentId
+            if let eventIndex = updatedEvents.firstIndex(where: { $0.id == parent }) {
+                if updatedEvents[eventIndex].tasks == nil {
+                    updatedEvents[eventIndex].tasks = []
+                }
+                if task.isDeleted != true {
+                    updatedEvents[eventIndex].tasks.append(task)
+                }
             }
-            if task.isDeleted != true {
-                updatedEvents[eventIndex].tasks.append(task)
-            }
-        }
+
     }
     
     return updatedEvents
@@ -113,7 +123,8 @@ func parseICSEvents(icsData: String) -> [UniversalEvent] {
             
             let dateFormatter = DateFormatter()
             dateFormatter.dateFormat = "yyyy-MM-dd HH:mm"
-            dateFormatter.timeZone = TimeZone(identifier: "UTC") // Treat input as absolute UTC time
+            dateFormatter.timeZone = TimeZone(abbreviation: "UTC")
+
 
             guard let eventDate = dateFormatter.date(from: start) else {
                 print("Error parsing date for event: \(summary)")
@@ -121,7 +132,7 @@ func parseICSEvents(icsData: String) -> [UniversalEvent] {
             }
 
             let event = UniversalEvent(
-                id: Int(idCreation(subject: summary, start: eventDate)),
+                id: compactEventID64(subject: summary, beginDate: eventDate),
                 name: summary,
                 date: eventDate,
                 eventType: eventType,
@@ -133,6 +144,7 @@ func parseICSEvents(icsData: String) -> [UniversalEvent] {
                 location: location,
                 isEventOblig: isEventOblig
             )
+            print(event)
             
             events.append(event)
 
@@ -154,7 +166,8 @@ func parseICSEvents(icsData: String) -> [UniversalEvent] {
 func decodeICSTime(_ icsTime: String) -> String {
     let dateFormatter = DateFormatter()
     dateFormatter.dateFormat = "yyyyMMdd'T'HHmmss"
-    dateFormatter.timeZone = TimeZone(identifier: "Warsaw/Europe") // Treating input as UTC
+    dateFormatter.timeZone = TimeZone(identifier: "Europe/Warsaw") // or .current if local time
+
 
     guard let date = dateFormatter.date(from: icsTime) else {
         return "Invalid Date"
@@ -167,31 +180,39 @@ func decodeICSTime(_ icsTime: String) -> String {
     return outputFormatter.string(from: date)
 }
 
-func idCreation(subject: String, start: Date) -> UInt64 {
-    let subjectID = UInt64(subjectHash(subject))               // 16 bits
-    let minutes = UInt64(start.timeIntervalSince1970 / 60)    // epoch minutes
-    
-    let eventID = (subjectID << 48) | (minutes << 8)
-    return eventID
-}
-
-func subjectHash(_ subject: String) -> UInt16 {
-    var hash: UInt32 = 0x811C9DC5 // 32-bit FNV offset basis
-    for byte in subject.utf8 {
-        hash ^= UInt32(byte)
-        hash = hash &* 16777619 // 32-bit FNV prime
+func compactEventID64(subject: String, beginDate: Date) -> UInt64 {
+    let iso = ISO8601DateFormatter()
+    iso.timeZone = .init(secondsFromGMT: 0)
+    let key = subject + "|" + iso.string(from: beginDate)
+    // FNV-1a 64-bit
+    var hash: UInt64 = 0xcbf29ce484222325
+    for b in key.utf8 {
+        hash ^= UInt64(b)
+        hash &*= 0x100000001b3
     }
-    return UInt16(truncatingIfNeeded: hash) // fold to 16-bit
+    return hash
 }
 
-func subjectID(from eventID: UInt64) -> UInt16 {
-    return UInt16((eventID >> 48) & 0xFFFF)
-}
+//func idCreation(subject: String, start: Date) -> UInt64 {
+//    let subjectID = UInt64(subjectHash(subject))               // 16 bits
+//    //let minutes = UInt64(start.timeIntervalSince1970 / 60)    // epoch minutes
+//    
+//    //let eventID = (subjectID << 48)/* | (minutes << 8)*/
+//    return subjectID
+//}
 
-/// Extract group/lecturer index from EventID
-func groupID(from eventID: UInt64) -> UInt8 {
-    return UInt8(eventID & 0xFF)
-}
+//func subjectHash(_ subject: String) -> UInt16 {
+//    var hash: UInt32 = 0x811C9DC5 // 32-bit FNV offset basis
+//    for byte in subject.utf8 {
+//        hash ^= UInt32(byte)
+//        hash = hash &* 16777619 // 32-bit FNV prime
+//    }
+//    return UInt16(truncatingIfNeeded: hash) // fold to 16-bit
+//}
+
+//func subjectID(from eventID: UInt64) -> UInt16 {
+//    return UInt16((eventID >> 48) & 0xFFFF)
+//}
 
 
 // Theoreticaly useless

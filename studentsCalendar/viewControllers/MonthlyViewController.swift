@@ -30,39 +30,7 @@ class MonthlyViewController: UIViewController, UICollectionViewDelegate, UIColle
         super.viewDidLoad()
         collectionView.register(MonthlyCollectionViewCell.nib(), forCellWithReuseIdentifier: "MonthlyCollectionViewCell")
         checkAndRequestScheduleURL()
-        
-//        Task {
-//            await uploadAndParseEvents()
-//            await loadTheWholeList()
-//            await setMonthView()
-//        }
-        
-//        let longPressGesture = UILongPressGestureRecognizer(target: self, action: #selector(handleLongPress))
-//            collectionView.addGestureRecognizer(longPressGesture)
-        
-//        UserDefaults.standard.removeObject(forKey: "savedTasks")
-//        UserDefaults.standard.synchronize()
-//        UserDefaults.standard.removeObject(forKey: "savedCustomEvents")
-//        UserDefaults.standard.synchronize()
-//        UserDefaults.standard.removeObject(forKey: "savedLoadedEvents")
-//        UserDefaults.standard.synchronize()
-        
-        
-        
     }
-    //TODO: Test addition
-//    @objc func handleLongPress(gesture: UILongPressGestureRecognizer) {
-//        if gesture.state == .began {
-//            let touchPoint = gesture.location(in: collectionView)
-//            if let indexPath = collectionView.indexPathForItem(at: touchPoint) {
-//                print("Long pressed cell at section \(indexPath.section), row \(indexPath.item)")
-//                
-//                // Perform action, e.g., delete or edit
-//            }
-//        }
-//    }
-    
-    
     
     override func viewWillAppear(_ animated: Bool) {
         Task {
@@ -99,9 +67,9 @@ class MonthlyViewController: UIViewController, UICollectionViewDelegate, UIColle
         present(alert, animated: true)
     }
 
-    func getScheduleURL() -> String? {
-        return UserDefaults.standard.string(forKey: scheduleURLKey)
-    }
+//    func getScheduleURL() -> String? {
+//        return UserDefaults.standard.string(forKey: scheduleURLKey)
+//    }
     
     
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {

@@ -16,21 +16,13 @@ func saveCustomEventsToUserDefaults(events: [UniversalEvent]) async {
     }
 }
 
+// Save Tasks
 func saveUsersTasksToUserDefaults(tasks: [HomeTask]) async {
     let encoder = JSONEncoder()
     if let encoded = try? encoder.encode(tasks) {
         UserDefaults.standard.set(encoded, forKey: "savedTasks")
     }
 }
-
-/*
-func saveCustomEventsToUserDefaults(events: [CustomEvent]) {
-    let encoder = JSONEncoder()
-    if let encoded = try? encoder.encode(events) {
-        UserDefaults.standard.set(encoded, forKey: "savedCustomEvents")
-    }
-}
- */
 
 // Load Downloaded (Schedule) Events
 func loadScheduleEventsFromUserDefaults() async -> [UniversalEvent] {
@@ -50,6 +42,7 @@ func loadCustomEventsFromUserDefaults() -> [UniversalEvent] {
     return []
 }
 
+// Load Tasks
 func loadHomeTasks() async -> [HomeTask] {
     if let savedData = UserDefaults.standard.data(forKey: "savedTasks"),
        let decodedTasks = try? JSONDecoder().decode([HomeTask].self, from: savedData) {

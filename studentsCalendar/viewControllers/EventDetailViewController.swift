@@ -1,16 +1,28 @@
 import UIKit
 
+protocol TaskInformationParseDelegate: AnyObject {
+    func userDidChooseConcreteTask(task: HomeTask)
+}
+
 class EventDetailViewController: UIViewController, UITableViewDelegate, UITableViewDataSource {
     
     var event: UniversalEvent?
     var tasks: [HomeTask] = []
+    
+    let showTaskDetail = "showTaskDetail"
     
     @IBOutlet weak var eventSummary: UILabel!
     @IBOutlet weak var dateLabel: UILabel!
     @IBOutlet weak var shortDescLabel: UILabel!
     @IBOutlet weak var eventTime: UILabel!
     @IBOutlet weak var locationLabel: UILabel!
+    @IBOutlet weak var notesLabel: UILabel!
+    @IBOutlet weak var notesTextLabel: UILabel!
     @IBOutlet weak var tableView: UITableView!
+
+    @IBOutlet weak var tableViewTopToLocation: NSLayoutConstraint!
+    @IBOutlet weak var tableViewTopBelowNotes: NSLayoutConstraint!
+    
     weak var delegate: EventInformationParseDelegate?
     
     override func viewDidLoad() {
@@ -18,7 +30,7 @@ class EventDetailViewController: UIViewController, UITableViewDelegate, UITableV
         viewControllerSetup()
         
         tableView.register(TaskPrewatchViewCell.nib(), forCellReuseIdentifier: "taskCell")
-        //tableView.register(TaskPrewatchViewCell.nib(), forCellReuseIdentifier: })
+        
         if event?.eventType == EventType.userCreated {
             print("Custom event")
         } else if event?.eventType == EventType.scheduleDownloaded {
@@ -27,13 +39,10 @@ class EventDetailViewController: UIViewController, UITableViewDelegate, UITableV
         tasksListSetUp(event!)
         print(event?.tasks)
         
+        // Ensure initial constraints state reflects current content
+        applyTopConstraintForContent(animated: false)
     }
-    //    override func viewWillAppear(_ animated: Bool) {
-    //        tasksListSetUp(event ?? nil)
-    //        print(event?.tasks)
-    //    }
 
-    
     func viewControllerSetup() {
         if let demonstrEvent = event {
             eventSummary.text = demonstrEvent.name
@@ -47,12 +56,18 @@ class EventDetailViewController: UIViewController, UITableViewDelegate, UITableV
             if demonstrEvent.eventType == EventType.userCreated {
                 shortDescLabel.text = demonstrEvent.shortDescription
                 locationLabel.text = demonstrEvent.location
+                notesLabel.text = demonstrEvent.notates ?? ""
+                notesLabel.isHidden = (notesLabel.text?.isEmpty ?? true)
+                notesTextLabel.isHidden = (notesLabel.text?.isEmpty ?? true)
             } else {
                 shortDescLabel.text = ""
                 locationLabel.text = "Building \(demonstrEvent.building ?? "Unknown"), room \(demonstrEvent.roomNumber ?? "Unknown")"
+                // For schedule events, show/hide description/notes if present
+                notesLabel.text = demonstrEvent.notates ?? ""
+                notesLabel.isHidden = (notesLabel.text?.isEmpty ?? true)
+                notesTextLabel.isHidden = (notesLabel.text?.isEmpty ?? true)
             }
         }
-        
     }
     
     func tasksListSetUp(_ event: UniversalEvent?) {
@@ -63,7 +78,6 @@ class EventDetailViewController: UIViewController, UITableViewDelegate, UITableV
         }
     }
 
-    
     func deleteTask(_ taskToDelete: HomeTask) async {
         var tasksList = await loadHomeTasks()
         if let index = tasksList.firstIndex(where: { $0.date == taskToDelete.date && $0.testName == taskToDelete.testName && $0.id == taskToDelete.id }),
@@ -105,16 +119,14 @@ class EventDetailViewController: UIViewController, UITableViewDelegate, UITableV
         }
     }
 
-
-    
     func extractTime(from dateString: String) -> String? {
         let inputFormatter = DateFormatter()
-        inputFormatter.dateFormat = "yyyy-MM-dd HH.mm" // Match input format
+        inputFormatter.dateFormat = "yyyy-MM-dd HH.mm"
         guard let date = inputFormatter.date(from: dateString) else {
-            return nil // Return nil if parsing fails
+            return nil
         }
         let outputFormatter = DateFormatter()
-        outputFormatter.dateFormat = "HH:mm" // Extract time in HH:mm format
+        outputFormatter.dateFormat = "HH:mm"
         return outputFormatter.string(from: date)
     }
     
@@ -160,7 +172,52 @@ class EventDetailViewController: UIViewController, UITableViewDelegate, UITableV
             }
             print("Deleted item at row \(indexPath.row)")
         }
-        
     }
     
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        let selectedTask: HomeTask = tasks[indexPath.row]
+        performSegue(withIdentifier: showTaskDetail, sender: selectedTask)
+    }
+    
+    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+        if segue.identifier == showTaskDetail,
+           let destinationVC = segue.destination as? TaskDetailWatchController,
+           let taskToPass = sender as? HomeTask {
+            destinationVC.task = taskToPass
+            destinationVC.delegate = self
+        }
+    }
+    
+    // MARK: - Option B: toggle constraints
+    private func applyTopConstraintForContent(animated: Bool) {
+        // Decide if description/notes are effectively present
+        let hasNotes = !(notesTextLabel.text?.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ?? true) && !notesTextLabel.isHidden
+        
+        // Activate/deactivate the two alternative constraints
+        tableViewTopToLocation.isActive = !hasNotes
+        tableViewTopBelowNotes.isActive = hasNotes
+        
+        if animated {
+            UIView.animate(withDuration: 0.25) {
+                self.view.layoutIfNeeded()
+            }
+        } else {
+            self.view.layoutIfNeeded()
+        }
+    }
+    
+    // Call this if you later change descr/notes dynamically
+    func updateLayoutBasedOnField(isFieldFilled: Bool) {
+        tableViewTopToLocation.isActive = !isFieldFilled
+        tableViewTopBelowNotes.isActive = isFieldFilled
+        UIView.animate(withDuration: 0.25) {
+            self.view.layoutIfNeeded()
+        }
+    }
+}
+
+extension EventDetailViewController: TaskInformationParseDelegate {
+    func userDidChooseConcreteTask(task: HomeTask) {
+        print("Sent task is \(task)")
+    }
 }

@@ -118,12 +118,10 @@ class TaskAdditionViewController: UIViewController, UIPickerViewDelegate, UIPick
         self.view.frame.origin.y = 0
     }
 
-
     
     // MARK: - Handle Date Picker Change
     @IBAction func saveAction(_ sender: Any) {
         Task { @MainActor in
-            var id: Int
             var priority: Int
             var testName: String
             var subject: String
@@ -163,7 +161,8 @@ class TaskAdditionViewController: UIViewController, UIPickerViewDelegate, UIPick
                 showAlert(message: "Please select a subject.")
                 return
             }
-            subject = subjects[selectedSubjectIndex].name
+            let selectedEvent = subjects[selectedSubjectIndex]
+            subject = selectedEvent.name
             
             // Get selected way of passing from taskPassPicker
             let selectedWayIndex = taskPassWay.selectedRow(inComponent: 0)
@@ -179,13 +178,11 @@ class TaskAdditionViewController: UIViewController, UIPickerViewDelegate, UIPick
                 return
             }
             
-            //wayOfPassing = taskPassWay.selectedRow(inComponent: 1)
-            
-            date = subjects[selectedSubjectIndex].date
-            id = await loadHomeTasks().count
+            date = selectedEvent.date
             
             let newTask = HomeTask(
-                id: Int(idCreation(parentID: UInt64(subjects[selectedSubjectIndex].id), taskName: testName)),
+                id: compactEventID64(subject: subject, beginDate: date),
+                parentId: selectedEvent.id,
                 priority: priority,
                 testName: testName,
                 subject: subject,
@@ -204,35 +201,9 @@ class TaskAdditionViewController: UIViewController, UIPickerViewDelegate, UIPick
             
             await saveUsersTasksToUserDefaults(tasks: savedTasks)
             
-            let localEventsList = eventsList
+            var localEventsList = eventsList
             
-//            if let eventIndex = localEventsList.firstIndex(where: { $0.date == date && $0.name == subject }) {
-//                localEventsList[eventIndex].tasks.append(newTask)
-////                localEventsList[eventIndex].tasks = HomeTask.sortByPriority(localEventsList[eventIndex].tasks)
-//                print(localEventsList[eventIndex])
-//                if localEventsList[eventIndex].eventType == .scheduleDownloaded {
-//                    var scheduleEventslist: [UniversalEvent] = []
-//                    for events in localEventsList {
-//                        if events.eventType == .scheduleDownloaded {
-//                            scheduleEventslist.append(events)
-//                        }
-//                        
-//                    }
-//                    
-//                    await saveDownloadedEventsToUserDefaults(events: scheduleEventslist)
-//                } else {
-//                    var userEventslist: [UniversalEvent] = []
-//                    for events in localEventsList {
-//                        if events.eventType == .userCreated {
-//                            userEventslist.append(events)
-//                        }
-//                        
-//                    }
-//                    await saveCustomEventsToUserDefaults(events: userEventslist)
-//                }
-//            }
-            
-            if let eventIndex = localEventsList.firstIndex(where: { $0.id == parentID(from: UInt64(id))}) {
+            if let eventIndex = localEventsList.firstIndex(where: { $0.id == selectedEvent.id }) {
                 localEventsList[eventIndex].tasks.append(newTask)
 //                localEventsList[eventIndex].tasks = HomeTask.sortByPriority(localEventsList[eventIndex].tasks)
                 print(localEventsList[eventIndex])

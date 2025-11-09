@@ -30,11 +30,17 @@ class EventEditViewController: UIViewController, UITextFieldDelegate
         eventStartdatePicker.date = date ?? selectedDate
         eventEnddatePicker.date = date ?? selectedDate
         notatesTF.delegate = self
+        
+        // Apply initial state so UI matches the switch when the view appears
+//        let initialOn = repeatStatusSwitch?.isOn ?? false
+//        print("EventEditViewController: viewDidLoad, repeatStatusSwitch is \(initialOn ? "ON" : "OFF"), repaetEventPeaker is \(repaetEventPeaker == nil ? "nil" : "connected")")
+
     }
     
     deinit {
         NotificationCenter.default.removeObserver(self)
     }
+    
     
     private func setupKeyboardObservers() {
         NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillShow), name: UIResponder.keyboardWillShowNotification, object: nil)
@@ -42,18 +48,16 @@ class EventEditViewController: UIViewController, UITextFieldDelegate
     }
 
     @objc private func keyboardWillShow(notification: Notification) {
-        if !isImportantTextFieldActive { return }  // Only move if fifth field is active
+        if !isImportantTextFieldActive { return }
         
         guard let userInfo = notification.userInfo,
               let keyboardFrame = userInfo[UIResponder.keyboardFrameEndUserInfoKey] as? CGRect else { return }
         
         let keyboardHeight = keyboardFrame.height
-        self.view.frame.origin.y = -keyboardHeight / 4   // Move up a bit (adjust if needed)
+        self.view.frame.origin.y = -keyboardHeight / 4
     }
 
     @objc private func keyboardWillHide(notification: Notification) {
-        /*if !isImportantTextFieldActive { return }*/  // Only reset if fifth field was active
-        
         self.view.frame.origin.y = 0
     }
     
@@ -93,27 +97,11 @@ class EventEditViewController: UIViewController, UITextFieldDelegate
                 notates = notes
             }
             
-            // Check if both name and short description are empty
             if summary.isEmpty && shortDescr.isEmpty {
                 showAlert(message: "You need to add at least one of those fields: Name or Short Description.")
                 return
             }
             
-//            let id = eventsList.count
-//            date = eventStartdatePicker.date
-//            start = dateToString(eventStartdatePicker.date)
-//            end = dateToString(eventEnddatePicker.date)
-//            
-//            let newEvent = UniversalEvent(id: id, name: summary, date: date!, eventType: eventType, summary: summary, start: start, end: end, location: location, shortDescription: shortDescr, notates: notates, isEventOblig: isEventOblig)
-//            
-//            var savedEvents = await loadCustomEventsFromUserDefaults()
-//            savedEvents.append(newEvent)
-//            savedEvents.sort { $0.date < $1.date }
-//            
-//            await saveCustomEventsToUserDefaults(events: savedEvents)
-//            await loadTheWholeList()
-//            
-//            navigationController?.popViewController(animated: true)
             let calendar = Calendar.current
             let startDate = eventStartdatePicker.date
             let endDate = eventEnddatePicker.date
@@ -123,17 +111,14 @@ class EventEditViewController: UIViewController, UITextFieldDelegate
                 return
             }
 
-//            var currentDate = calendar.startOfDay(for: startDate)
-//            let endDateDay = calendar.startOfDay(for: endDate)
             var currentDate = startDate
             let endDateDay = endDate
 
-
             var savedEvents = await loadCustomEventsFromUserDefaults()
-            let origin = currentDate;
+            let origin = currentDate
             while currentDate <= endDateDay {
                 let newEvent = UniversalEvent(
-                    id: savedEvents.count,
+                    id: compactEventID64(subject: summary, beginDate: dateCheck(origin: origin, current: currentDate)),
                     name: summary,
                     date: dateCheck(origin: origin, current: currentDate),
                     eventType: eventType,
@@ -160,7 +145,6 @@ class EventEditViewController: UIViewController, UITextFieldDelegate
         }
     }
 
-    // Function to show an alert
     func showAlert(message: String) {
         let alert = UIAlertController(title: "Warning", message: message, preferredStyle: .alert)
         alert.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))
@@ -181,7 +165,7 @@ class EventEditViewController: UIViewController, UITextFieldDelegate
         if originDate != currentDate {
             return "00:00"
         } else {
-            return dateToString(origin);
+            return dateToString(origin)
         }
     }
     
@@ -192,7 +176,7 @@ class EventEditViewController: UIViewController, UITextFieldDelegate
         if beginDate != endDate {
             return "23:59"
         } else {
-            return dateToString(end);
+            return dateToString(end)
         }
     }
     
@@ -212,6 +196,7 @@ class EventEditViewController: UIViewController, UITextFieldDelegate
             return newDate!
         }
     }
+    
+
 
 }
-

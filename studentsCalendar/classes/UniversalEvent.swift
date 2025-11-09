@@ -22,7 +22,7 @@ var eventsList = [UniversalEvent]()
 var tasksList = [HomeTask]()
 
 class UniversalEvent: Codable {
-    var id: Int
+    var id: UInt64
     var name: String
     var date: Date
     var eventType: EventType?
@@ -39,7 +39,7 @@ class UniversalEvent: Codable {
     var isEventOblig: Bool?
     var tasks: [HomeTask?]
     
-    init(id: Int, name: String, date: Date, eventType: EventType? = nil, summary: String? = nil, start: String? = nil, end: String? = nil, roomNumber: String? = nil, building: String? = nil, location: String? = nil, shortDescription: String? = nil, notates: String? = nil, isEventOblig: Bool? = nil, tasks: [HomeTask?] = []) {
+    init(id: UInt64, name: String, date: Date, eventType: EventType? = nil, summary: String? = nil, start: String? = nil, end: String? = nil, roomNumber: String? = nil, building: String? = nil, location: String? = nil, shortDescription: String? = nil, notates: String? = nil, isEventOblig: Bool? = nil, tasks: [HomeTask?] = []) {
         self.id = id
         self.name = name
         self.date = date
@@ -59,7 +59,7 @@ class UniversalEvent: Codable {
     required init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         
-        self.id = try container.decode(Int.self, forKey: .id)
+        self.id = try container.decode(UInt64.self, forKey: .id)
         self.name = try container.decode(String.self, forKey: .name)
         self.date = try container.decode(Date.self, forKey: .date)
         self.summary = try container.decodeIfPresent(String.self, forKey: .summary)
@@ -80,32 +80,73 @@ class UniversalEvent: Codable {
         roomNumber, building, shortDescription, notates, tasks
     }
 }
+//
+//struct HomeTask: Codable, Hashable {
+//    var id: UInt64
+//    var parentId: UInt64
+//    var priority: Int       // 0 - task, 1 - exam
+//    var testName: String
+//    var subject: String
+//    var date: Date
+//    var task: String
+//    var description: String
+//    var wayOfPassing: WayOfTaskPass
+//    var isDeleted: Bool
+//    var additionalNotes: String?
+//    
+//    init(id: UInt64, parentId: UInt64, priority: Int, testName: String, subject: String, date: Date, task: String, description: String, wayOfPassing: WayOfTaskPass, isDeleted: Bool, additionalNotes: String? = nil) {
+//        self.id = id
+//        self.parentId = parentId
+//        self.priority = priority
+//        self.testName = testName
+//        self.subject = subject
+//        self.date = date
+//        self.task = task
+//        self.description = description
+//        self.wayOfPassing = wayOfPassing
+//        self.isDeleted = isDeleted
+//        self.additionalNotes = additionalNotes
+//    }
+//}
 
-struct HomeTask: Codable, Hashable {
-    var id: Int
-    var priority: Int
-    var testName: String
-    var subject: String
-    var date: Date
-    var task: String
-    var description: String
-    var wayOfPassing: WayOfTaskPass
-    var isDeleted: Bool
-    var additionalNotes: String?
-    
-    init(id: Int, priority: Int, testName: String, subject: String, date: Date, task: String, description: String, wayOfPassing: WayOfTaskPass, isDeleted: Bool, additionalNotes: String? = nil) {
-        self.id = id
-        self.priority = priority
-        self.testName = testName
-        self.subject = subject
-        self.date = date
-        self.task = task
-        self.description = description
-        self.wayOfPassing = wayOfPassing
-        self.isDeleted = isDeleted
-        self.additionalNotes = additionalNotes
-    }
-}
+//class SubjectInfoCollection: Codable, Hashable {
+//    var collectionName: String
+//    var subjectsCollection: [UniversalEvent]
+//    var infoAboutSubject: String?
+//    var listOfTasks: [HomeTask?]
+//    var listOfExams: [HomeTask?]
+//    
+//    init(collectionName: String, subjectsCollection: [UniversalEvent], infoAboutSubject: String? = nil, listOfTasks: [HomeTask?], listOfExams: [HomeTask?]) {
+//        self.collectionName = collectionName
+//        self.subjectsCollection = subjectsCollection
+//        self.infoAboutSubject = infoAboutSubject
+//        self.listOfTasks = listOfTasks
+//        self.listOfExams = listOfExams
+//    }
+//    
+//    required init(from decoder: Decoder) throws {
+//        let container = try decoder.container(keyedBy: CodingKeys.self)
+//        
+//        self.id = try container.decode(Int.self, forKey: .id)
+//        self.name = try container.decode(String.self, forKey: .name)
+//        self.date = try container.decode(Date.self, forKey: .date)
+//        self.summary = try container.decodeIfPresent(String.self, forKey: .summary)
+//        self.start = try container.decodeIfPresent(String.self, forKey: .start)
+//        self.end = try container.decodeIfPresent(String.self, forKey: .end)
+//        self.location = try container.decodeIfPresent(String.self, forKey: .location)
+//        self.isEventOblig = try container.decodeIfPresent(Bool.self, forKey: .isEventOblig)
+//        self.eventType = try container.decodeIfPresent(EventType.self, forKey: .eventType)
+//        self.roomNumber = try container.decodeIfPresent(String.self, forKey: .roomNumber)
+//        self.building = try container.decodeIfPresent(String.self, forKey: .building)
+//        self.shortDescription = try container.decodeIfPresent(String.self, forKey: .shortDescription)
+//        self.notates = try container.decodeIfPresent(String.self, forKey: .notates)
+//        self.tasks = try container.decode([HomeTask].self, forKey: .tasks)
+//    }
+//    
+//    enum CodingKeys: String, CodingKey {
+//        case collectionName, subjectsCollection, infoAboutSubject, listOfTasks, listOfExams
+//    }
+//}
 //    required init(from decoder: Decoder) throws {
 //        let container = try decoder.container(keyedBy: CodingKeys.self)
 //        

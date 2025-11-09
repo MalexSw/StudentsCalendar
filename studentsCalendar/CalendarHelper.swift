@@ -92,6 +92,5 @@ class CalendarHelper
         }
         return daysEvents
     }
-
-    
 }
+
